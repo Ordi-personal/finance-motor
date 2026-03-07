@@ -67,7 +67,7 @@ jobs:
 
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
 
@@ -341,7 +341,7 @@ jobs:
 
     steps:
       - name: Check out main branch
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v6
         with:
           ref: main
           token: ${{ secrets.GH_PAT }}
