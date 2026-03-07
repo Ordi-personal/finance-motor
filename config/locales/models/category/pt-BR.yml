@@ -1,0 +1,28 @@
+pt-BR:
+  models:
+    category:
+      defaults:
+        income: "Receitas"
+        food_drink: "Alimentação"
+        groceries: "Mercado"
+        shopping: "Compras"
+        transportation: "Transporte"
+        travel: "Viagem"
+        entertainment: "Lazer e Diversão"
+        healthcare: "Saúde"
+        personal_care: "Cuidados Pessoais"
+        home_improvement: "Casa e Reforma"
+        mortgage_rent: "Moradia (Aluguel/Financiamento)"
+        utilities: "Contas (Luz, Água, Internet)"
+        subscriptions: "Assinaturas"
+        insurance: "Seguros"
+        sports_fitness: "Esportes e Lazer"
+        gifts_donations: "Presentes e Doações"
+        taxes: "Impostos"
+        loan_payments: "Empréstimos"
+        services: "Serviços"
+        fees: "Taxas Bancárias"
+        savings_investments: "Investimentos e Reserva"
+        investment_contributions: "Aportes em Investimentos"
+      uncategorized: "Sem Categoria"
+      other_investments: "Outros Investimentos"

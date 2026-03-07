@@ -1,0 +1,38 @@
+"pt-BR":
+  rules:
+    condition_filters:
+      transaction_name:
+        label: "Nome da Transação"
+      transaction_amount:
+        label: "Valor da Transação"
+      transaction_category:
+        label: "Categoria da Transação"
+      transaction_account:
+        label: "Conta da Transação"
+    action_executors:
+      set_transaction_category:
+        label: "Definir categoria"
+      set_transaction_account:
+        label: "Definir conta"
+      update_transaction_name:
+        label: "Renomear transação"
+      mark_as_transfer:
+        label: "Marcar como transferência"
+      delete_transaction:
+        label: "Excluir transação"
+      auto_categorize:
+        label: "Auto-categorizar com IA"
+    operators:
+      text:
+        contains: "contém"
+        equal_to: "igual a"
+        is_empty: "está vazio"
+      number:
+        greater_than: "maior que"
+        greater_or_equal_to: "maior ou igual a"
+        less_than: "menor que"
+        less_than_or_equal_to: "menor ou igual a"
+        is_equal_to: "igual a"
+      select:
+        equal_to: "igual a"
+        is_empty: "está vazio"

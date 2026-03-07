@@ -1,0 +1,61 @@
+---
+pt-BR:
+  family_merchants:
+    create:
+      error: 'Erro ao criar comerciante: %{error}'
+      success: Novo comerciante criado com sucesso
+    destroy:
+      success: Comerciante excluído com sucesso
+      unlinked_success: Comerciante removido das suas transações
+    edit:
+      title: Editar comerciante
+    form:
+      name_placeholder: Nome do comerciante
+      website_placeholder: "Site (ex: starbucks.com)"
+      website_hint: Digite o site do comerciante para exibir automaticamente o logo
+    index:
+      empty: Nenhum comerciante ainda
+      new: Novo comerciante
+      merge: Mesclar comerciantes
+      title: Comerciantes
+      family_title: Comerciantes da Família
+      family_empty: Nenhum comerciante da família ainda
+      provider_title: Comerciantes do Provedor
+      provider_empty: Nenhum comerciante do provedor vinculado a esta família ainda
+      provider_read_only: Comerciantes do provedor são sincronizados das suas instituições conectadas. Eles não podem ser editados aqui.
+      provider_info: Estes comerciantes foram detectados automaticamente pelas suas conexões bancárias ou IA. Você pode editá-los para criar sua própria cópia, ou removê-los para desvincular das suas transações.
+      unlinked_title: Desvinculados recentemente
+      unlinked_info: Estes comerciantes foram removidos recentemente das suas transações. Eles desaparecerão desta lista após 30 dias, a menos que sejam reatribuídos a uma transação.
+      table:
+        merchant: Comerciante
+        actions: Ações
+        source: Origem
+    merchant:
+      confirm_accept: Excluir comerciante
+      confirm_body: Tem certeza de que deseja excluir este comerciante? Remover este comerciante desvinculará todas as transações associadas e pode afetar seus relatórios.
+      confirm_title: Excluir comerciante?
+      delete: Excluir comerciante
+      edit: Editar comerciante
+    merge:
+      title: Mesclar comerciantes
+      description: Selecione um comerciante de destino e os comerciantes para mesclar. Todas as transações dos comerciantes mesclados serão reatribuídas ao destino.
+      target_label: Mesclar em (destino)
+      select_target: Selecione o comerciante destino...
+      sources_label: Comerciantes para mesclar
+      sources_hint: Os comerciantes selecionados serão mesclados no destino. Comerciantes da família serão excluídos, comerciantes do provedor serão desvinculados.
+      submit: Mesclar selecionados
+    new:
+      title: Novo comerciante
+    perform_merge:
+      success: '%{count} comerciantes mesclados com sucesso'
+      no_merchants_selected: Nenhum comerciante selecionado para mesclar
+      target_not_found: Comerciante destino não encontrado
+      invalid_merchants: Comerciantes inválidos selecionados
+    provider_merchant:
+      edit: Editar
+      remove: Remover
+      remove_confirm_title: Remover comerciante?
+      remove_confirm_body: Tem certeza de que deseja remover %{name}? Isso desvinculará todas as transações associadas deste comerciante, mas não excluirá o comerciante em si.
+    update:
+      success: Comerciante atualizado com sucesso
+      converted_success: Comerciante convertido e atualizado com sucesso

@@ -1,0 +1,55 @@
+service: finance-motor
+image: vagneralencar/finance-motor
+
+servers:
+  web:
+    hosts:
+      - 167.86.123.161
+    options:
+      network-alias: finance-motor-web
+    labels:
+      kamal-proxy.host: finance.fluxome.app
+      kamal-proxy.ssl: "true"
+      kamal-proxy.app_port: 4000
+  job:
+    hosts:
+      - 167.86.123.161
+    cmd: bundle exec sidekiq
+
+registry:
+  server: ghcr.io
+  username: vagneralencar
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+env:
+  secret:
+    - RAILS_MASTER_KEY
+    - DATABASE_URL
+    - REDIS_URL
+    - SECRET_KEY_BASE
+    - RESEND_API_KEY
+    - DB_HOST
+    - POSTGRES_USER
+    - POSTGRES_PASSWORD
+  clear:
+    PORT: 4000
+    SELF_HOSTED: true
+    ONBOARDING_STATE: closed
+    ENABLE_FRAME_ANCESTORS: true
+    HTTP_ALLOWED_HOSTS: https://fluxome.app,https://admin.fluxome.app
+    RAILS_SERVE_STATIC_FILES: true
+    RAILS_ASSUME_SSL: true
+
+proxy:
+  ssl: true
+  host: finance.fluxome.app
+  app_port: 4000
+  healthcheck:
+    path: /up
+    interval: 10
+
+builder:
+  arch: amd64
+  args:
+    RUBY_VERSION: 3.2.2

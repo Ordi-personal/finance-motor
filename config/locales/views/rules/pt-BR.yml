@@ -1,0 +1,72 @@
+---
+pt-BR:
+  rules:
+    no_action: Sem Ação
+    actions:
+      value_placeholder: Digite um valor
+    apply_all:
+      button: Aplicar Todas
+      confirm_title: Aplicar Todas as Regras
+      confirm_message: Você está prestes a aplicar %{count} regras afetando %{transactions} transações únicas. Por favor, confirme se deseja prosseguir.
+      confirm_button: Confirmar e Aplicar Todas
+      success: Todas as regras foram enfileiradas para execução
+      ai_cost_title: Estimativa de Custo de IA
+      ai_cost_message: Isso usará IA para categorizar até %{transactions} transações.
+      estimated_cost: "Custo estimado: ~$%{cost}"
+      cost_unavailable_model: Estimativa de custo indisponível para o modelo "%{model}".
+      cost_unavailable_no_provider: Estimativa de custo indisponível (nenhum provedor de LLM configurado).
+      cost_warning: Você pode incorrer em custos, por favor verifique com o provedor do modelo os preços mais atualizados.
+      view_usage: Ver histórico de uso
+    recent_runs:
+      title: Execuções Recentes
+      description: Visualize o histórico de execução das suas regras, incluindo status de sucesso/falha e contagem de transações.
+      unnamed_rule: Regra Sem Nome
+      columns:
+        date_time: Data/Hora
+        execution_type: Tipo
+        status: Status
+        rule_name: Nome da Regra
+        transactions_counts:
+          queued: Enfileiradas
+          processed: Processadas
+          modified: Modificadas
+      execution_types:
+        manual: Manual
+        scheduled: Agendada
+      statuses:
+        pending: Pendente
+        success: Sucesso
+        failed: Falhou
+    index:
+      title: Regras
+      new_rule: Nova regra
+      empty: Nenhuma regra ainda
+      empty_description: Configure regras para executar ações em suas transações e outros dados a cada sincronização de conta.
+      ai_cost_warning: Ações de regras habilitadas por IA terão custo. Certifique-se de filtrar o mais restritivamente possível para evitar custos desnecessários.
+    form:
+      name_label: Nome
+      name_placeholder: Digite o nome da regra
+      conditions_label: Condições
+      conditions_hint: Quando TODAS as condições forem atendidas
+      actions_label: Ações
+      actions_hint: Execute estas ações
+      add_condition: Adicionar condição
+      add_action: Adicionar ação
+      save: Salvar regra
+      cancel: Cancelar
+    new:
+      title: Nova regra
+    edit:
+      title: Editar regra
+    create:
+      success: Regra criada com sucesso
+      error: Erro ao criar regra
+    update:
+      success: Regra atualizada com sucesso
+      error: Erro ao atualizar regra
+    destroy:
+      success: Regra excluída com sucesso
+    confirm:
+      title: Confirmar Regra
+    apply:
+      success: Regra aplicada com sucesso

@@ -1,0 +1,55 @@
+<%= render DS::Dialog.new(reload_on_close: params[:reload_on_close].present?) do |dialog| %>
+  <%
+    title = if @rule.name.present?
+              t("rules.confirm.title_named", name: @rule.name)
+            else
+              t("rules.confirm.title_generic")
+            end
+  %>
+  <% dialog.with_header(title: title) %>
+
+  <% dialog.with_body do %>
+    <p class="text-secondary text-sm mb-4">
+      <%= t("rules.confirm.message_html", count: @rule.affected_resource_count, resource_type: @rule.resource_type.pluralize).html_safe %>
+    </p>
+
+    <% if @rule.actions.any? { |a| a.action_type == "auto_categorize" } %>
+      <% affected_count = @rule.affected_resource_count %>
+      <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <div class="flex items-start gap-2">
+          <%= icon "info", class: "w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" %>
+          <div class="text-xs">
+          <div class="text-xs">
+            <p class="font-medium text-blue-900 mb-1"><%= t("rules.confirm.ai_cost_title") %></p>
+            <% if @estimated_cost.present? %>
+              <p class="text-blue-700">
+                <%= t("rules.confirm.ai_cost_message", count: affected_count) %>
+                <%= t("rules.confirm.estimated_cost", cost: sprintf("%.4f", @estimated_cost)).html_safe %>
+              </p>
+            <% else %>
+              <p class="text-blue-700">
+                <%= t("rules.confirm.ai_cost_message", count: affected_count) %>
+                <% if @selected_model.present? %>
+                  <span class="font-semibold"><%= t("rules.confirm.cost_unavailable_model", model: @selected_model) %></span>
+                <% else %>
+                  <span class="font-semibold"><%= t("rules.confirm.cost_unavailable_no_provider") %></span>
+                <% end %>
+                <%= t("rules.confirm.cost_warning") %>
+              </p>
+            <% end %>
+            <p class="text-blue-600 mt-1">
+              <%= link_to t("rules.confirm.view_usage"), settings_llm_usage_path, class: "underline hover:text-blue-800" %>
+            </p>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <%= render DS::Button.new(
+      text: t("rules.confirm.button"),
+      href: apply_rule_path(@rule),
+      method: :post,
+      full_width: true,
+      data: { turbo_frame: "_top" }) %>
+  <% end %>
+<% end %>

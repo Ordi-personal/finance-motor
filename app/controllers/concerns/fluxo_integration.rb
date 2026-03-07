@@ -1,0 +1,27 @@
+module FluxoIntegration
+  extend ActiveSupport::Concern
+
+  included do
+    before_action :handle_embedded_mode
+  end
+
+  private
+
+  def handle_embedded_mode
+    # Set embedded mode from URL param
+    if params[:embedded] == "true"
+      session[:embedded_mode] = true
+    elsif params[:embedded] == "false"
+      session[:embedded_mode] = nil
+    end
+    
+    # If accessing root URL directly (standalone), clear embedded mode
+    # This detects when user navigates to Sure directly vs via iframe
+    if request.path == "/" && !params[:embedded].present? && !request.referer&.include?("localhost:3000")
+      session[:embedded_mode] = nil
+    end
+
+    # Apply embedded mode from session
+    Current.embedded = session[:embedded_mode] == true
+  end
+end
