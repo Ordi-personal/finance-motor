@@ -102,11 +102,59 @@ Fixed atomic creation of Rules with nested Actions to comply with upstream valid
 
 Pass current timezone to `timezone_options` helper to ensure the selected timezone appears in the dropdown list.
 
+### 8. SSO Controller (JWT-based iframe login)
+
+**Files:**
+- `app/controllers/auth/sso_controller.rb` (new)
+- `config/routes.rb` (modified)
+
+**Type:** New Feature
+**Risk:** Medium
+
+Single sign-on endpoint allowing the Fluxo App to authenticate users into the embedded iframe via a short-lived JWT token. The token is signed with `RAILS_MASTER_KEY`-derived secret, validated on arrival, and exchanged for a Rails session.
+
+- `GET /auth/sso?token=<jwt>` — Validates JWT and logs the user in
+
+### 9. Fluxo Embedded Mode (FluxoIntegration concern)
+
+**Files:**
+- `app/controllers/concerns/fluxo_integration.rb` (new)
+- `app/controllers/application_controller.rb` (modified)
+
+**Type:** Integration
+**Risk:** Low
+
+Extracted embedded-mode logic into a Rails concern so that all controllers can detect whether the app is running inside the Fluxo iframe (`session[:embedded_mode]`). Uses `helper_method :embedded_mode?` to expose the state to views. This replaced a previous `Current.embedded` attribute that was removed in upstream `v0.6.8`.
+
+### 10. Fluxo Secret Server-to-Server Auth
+
+**File:** `app/controllers/api/v1/base_controller.rb` (modified)
+
+**Type:** Security / Integration
+**Risk:** Medium
+
+Added a minimal bypass in the API base controller that allows the Fluxo App to authenticate server-to-server requests without a user JWT. The bypass requires:
+
+1. `X-Fluxo-Secret` header matching `ENV["FLUXO_SHARED_SECRET"]` (via `ActiveSupport::SecurityUtils.secure_compare`)
+2. `X-User-Email` header identifying the target user
+
+The secret is managed via Kamal secrets (`config/deploy.yml` → `env.secret`) and is never hardcoded. If `FLUXO_SHARED_SECRET` is not set, the bypass is fully disabled.
+
+### 11. Ruby Version Pin (3.2.2)
+
+**Files:**
+- `.ruby-version`
+- `Dockerfile`
+
+**Type:** Configuration
+**Risk:** Low
+
+Upstream `v0.6.8` targets Ruby `3.4.7`. This fork pins the runtime to `3.2.2` for compatibility with the current production environment. A separate Ruby upgrade is planned.
+
 ## What Is NOT Modified
 
 - Core financial calculation engine
-- Database schema (no new tables or columns added)
-- Authentication/authorization logic
+- Authentication/authorization logic (upstream flows unchanged)
 - Original API endpoints behavior
 - Any business logic or accounting rules
 
