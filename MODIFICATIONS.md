@@ -37,11 +37,16 @@ This fork complies with AGPL-3.0 Section 13 by:
 **Type:** Configuration
 **Risk:** Low
 
-Allow embedding the application in an iframe from the Fluxo App domain.
+Allow embedding the application in an iframe from configured origins via `FRAME_ANCESTORS_HOSTS` environment variable (no domains hardcoded in source code).
 
 ```diff
 - policy.frame_ancestors :self
-+ policy.frame_ancestors :self, "http://localhost:3000", "https://fluxome.app", "https://*.fluxome.app"
++ frame_hosts = ENV["FRAME_ANCESTORS_HOSTS"]&.split(",")&.map(&:strip)
++ if frame_hosts.present?
++   policy.frame_ancestors :self, *frame_hosts
++ else
++   policy.frame_ancestors :self, "http://localhost:3000"
++ end
 ```
 
 ### 2. Default Locale (pt-BR)

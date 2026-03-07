@@ -31,7 +31,10 @@ env:
     - DATABASE_URL
     - REDIS_URL
     - SECRET_KEY_BASE
-    # Adicione outras variáveis secretas conforme necessário
+    - FLUXO_SHARED_SECRET
+    - SSO_SECRET_KEY
+    - SIDEKIQ_WEB_USERNAME
+    - SIDEKIQ_WEB_PASSWORD
   clear:
     PORT: 4000
     SELF_HOSTED: true

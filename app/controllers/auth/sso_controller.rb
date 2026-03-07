@@ -3,19 +3,22 @@
 module Auth
   class SsoController < ApplicationController
     skip_authentication only: [:callback]
-    
-    SSO_SECRET_KEY = ENV.fetch("SSO_SECRET_KEY", "development_secret_key")
 
     def callback
       token = params[:token]
-      
+
       if token.blank?
         return redirect_to new_session_path, alert: "SSO token is required"
       end
 
+      secret = ENV["SSO_SECRET_KEY"]
+      if secret.blank?
+        Rails.logger.error("[SSO] SSO_SECRET_KEY not configured — SSO disabled")
+        return redirect_to new_session_path, alert: "SSO not available"
+      end
+
       begin
-        # Decode and verify JWT token
-        payload = JWT.decode(token, SSO_SECRET_KEY, true, { algorithm: "HS256" }).first
+        payload = JWT.decode(token, secret, true, { algorithm: "HS256" }).first
         
         # Find or create user by email
         user = User.find_by(email: payload["email"])
