@@ -14,8 +14,15 @@ Rails.application.configure do
     policy.style_src   :self, :https, :unsafe_inline
     policy.connect_src :self, :https, :wss
 
-    # Allow iframe embedding for Fluxo App (and local dev)
-    policy.frame_ancestors :self, "http://localhost:3000", "https://fluxome.app", "https://*.fluxome.app"
+    # Allow iframe embedding from configured origins.
+    # In production, FRAME_ANCESTORS_HOSTS overrides the defaults.
+    frame_hosts = ENV["FRAME_ANCESTORS_HOSTS"]&.split(",")&.map(&:strip)
+    if frame_hosts.present?
+      policy.frame_ancestors :self, *frame_hosts
+    else
+      # Development fallback — localhost allowed for local dev only
+      policy.frame_ancestors :self, "http://localhost:3000"
+    end
 
     # Specify URI for violation reports
     # policy.report_uri "/csp-violation-report-endpoint"
