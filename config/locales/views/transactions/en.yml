@@ -40,18 +40,6 @@ en:
       convert_to_trade_title: Convert to Security Trade
       convert_to_trade_description: Convert this transaction into a Buy or Sell trade with security details for portfolio tracking.
       convert_to_trade_button: Convert to Trade
-      merchant_label: Merchant
-      name_label: Name
-      nature: Type
-      none: "(none)"
-      note_label: Notes
-      note_placeholder: Enter a note
-      overview: Overview
-      settings: Settings
-      tags_label: Tags
-      tab_transactions: Transactions
-      tab_upcoming: Upcoming
-      uncategorized: "(uncategorized)"
     activity_labels:
       buy: Buy
       sell: Sell
@@ -69,6 +57,16 @@ en:
     mark_recurring: Mark as Recurring
     mark_recurring_subtitle: Track this as a recurring transaction. Amount variance is automatically calculated from past 6 months of similar transactions.
     mark_recurring_title: Recurring Transaction
+    merchant_label: Merchant
+    name_label: Name
+    nature: Type
+    none: "(none)"
+    note_label: Notes
+    note_placeholder: Enter a note
+    overview: Overview
+    settings: Settings
+    tags_label: Tags
+    uncategorized: "(uncategorized)"
     potential_duplicate_title: Possible duplicate detected
     potential_duplicate_description: This pending transaction may be the same as the posted transaction below. If so, merge them to avoid double-counting.
     merge_duplicate: Yes, merge them
@@ -76,7 +74,6 @@ en:
     transaction:
       pending: Pending
       pending_tooltip: Pending transaction — may change when posted
-      linked_with_plaid: Linked with Plaid
       activity_type_tooltip: Investment activity type
       possible_duplicate: Duplicate?
       potential_duplicate_tooltip: This may be a duplicate of another transaction
@@ -98,11 +95,6 @@ en:
       transaction: transaction
       transactions: transactions
       import: Import
-    list:
-      drag_drop_title: Drop CSV to import
-      drag_drop_subtitle: Upload transactions directly
-      transaction: transaction
-      transactions: transactions
     toggle_recurring_section: Toggle upcoming recurring transactions
     search:
       filters:
@@ -123,13 +115,9 @@ en:
       security_label: Security
       security_prompt: Select a security...
       security_custom: "+ Enter custom ticker"
-      security_not_listed_hint: Don't see your security? Select "Enter custom ticker" at the bottom of the list.
+      security_hint: Select from your holdings or enter a custom ticker
       ticker_placeholder: AAPL
-      ticker_hint: Enter the stock/ETF ticker symbol (e.g., AAPL, MSFT)
-      ticker_search_placeholder: Search for a ticker...
-      ticker_search_hint: Search by ticker symbol or company name, or type a custom ticker
-      price_mismatch_title: Price may not match
-      price_mismatch_message: "Your price (%{entered_price}/share) differs significantly from %{ticker}'s current market price (%{market_price}). If this seems wrong, you may have selected the wrong security — try using \"Enter custom ticker\" to specify the correct one."
+      ticker_hint: Enter the stock/ETF ticker symbol
       quantity_label: Quantity (Shares)
       quantity_placeholder: e.g. 20
       quantity_hint: Number of shares traded
@@ -145,7 +133,6 @@ en:
       cancel: Cancel
       submit: Convert to Trade
       success: Transaction converted to trade
-      conversion_note: "Converted from transaction: %{original_name} (%{original_date})"
       errors:
         not_investment_account: Only transactions in investment accounts can be converted to trades
         already_converted: This transaction has already been converted or excluded

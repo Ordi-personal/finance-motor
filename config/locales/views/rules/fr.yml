@@ -2,7 +2,6 @@
 fr:
   rules:
     no_action: Aucune action
-    no_condition: Aucune condition
     actions:
       value_placeholder: Entrez une valeur
     apply_all:

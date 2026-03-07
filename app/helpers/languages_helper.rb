@@ -381,12 +381,32 @@ module LanguagesHelper
       .sort_by { |label, locale| label }
   end
 
-  def timezone_options
-    ActiveSupport::TimeZone.all
+  def timezone_options(current_timezone = nil)
+    options = ActiveSupport::TimeZone.all
       .sort_by { |tz| [ tz.utc_offset, tz.name ] }
       .map do |tz|
         name = tz.name.split(" - ").first.gsub(" (US & Canada)", "")
         [ "(#{tz.formatted_offset}) #{name}", tz.tzinfo.identifier ]
       end
+
+    return options if current_timezone.blank?
+
+    # Ensure current_timezone appears in the list even if TZInfo identifier
+    # is not mapped in ActiveSupport::TimeZone (e.g. "America/Fortaleza")
+    if options.none? { |(_, value)| value == current_timezone }
+      label = timezone_label_for(current_timezone)
+      options << [ label, current_timezone ] if label
+    end
+
+    options
+  end
+
+  def timezone_label_for(timezone_identifier)
+    tz = TZInfo::Timezone.get(timezone_identifier)
+    offset = tz.current_period.utc_total_offset
+    formatted_offset = ActiveSupport::TimeZone.seconds_to_utc_offset(offset)
+    "(#{formatted_offset}) #{timezone_identifier}"
+  rescue TZInfo::InvalidTimezoneIdentifier
+    nil
   end
 end

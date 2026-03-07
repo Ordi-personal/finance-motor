@@ -2,7 +2,6 @@
 de:
   rules:
     no_action: Keine Aktion
-    no_condition: Keine Bedingung
     recent_runs:
       title: Letzte Ausführungen
       description: Zeige die Ausführungsgeschichte deiner Regeln einschließlich Erfolgs-/Fehlerstatus und Transaktionsanzahlen.
@@ -23,3 +22,4 @@ de:
         pending: Ausstehend
         success: Erfolgreich
         failed: Fehlgeschlagen
+

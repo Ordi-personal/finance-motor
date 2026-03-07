@@ -1,8 +1,4 @@
 de:
-  views:
-    settings:
-      payments:
-        renewal: "Ihr Beitrag wird fortgesetzt am %{date}."
   settings:
     ai_prompts:
       show:
@@ -19,10 +15,10 @@ de:
         merchant_detector:
           title: Händlererkennung
           subtitle: Die KI identifiziert und ergänzt Transaktionsdaten mit Händlerinformationen
-    payments:
+    billings:
       show:
-        page_title: Zahlung
-        subscription_subtitle: Aktualisiere dein Abonnement und deine Zahlungsdetails
+        page_title: Abrechnung
+        subscription_subtitle: Aktualisiere dein Abonnement und deine Rechnungsdetails
         subscription_title: Abonnement verwalten
     preferences:
       show:
@@ -34,7 +30,6 @@ de:
         default_period: Standardzeitraum
         default_account_order: Standardreihenfolge der Konten
         language: Sprache
-        language_auto: Browsersprache
         page_title: Einstellungen
         theme_dark: Dunkel
         theme_light: Hell
@@ -95,12 +90,11 @@ de:
       advanced_section_title: Erweitert
       ai_prompts_label: KI-Eingabeaufforderungen
       api_key_label: API-Schlüssel
-      payment_label: Zahlung
+      billing_label: Abrechnung
       categories_label: Kategorien
       feedback_label: Feedback
       general_section_title: Allgemein
-      imports_label: Importe
-      exports_label: Exporte
+      imports_label: Import/Export
       logout: Abmelden
       merchants_label: Händler
       guides_label: Anleitungen

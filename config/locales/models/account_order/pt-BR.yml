@@ -1,0 +1,15 @@
+---
+pt-BR:
+  account_orders:
+    name_asc:
+      label: Nome (A-Z)
+      label_short: Nome ↑
+    name_desc:
+      label: Nome (Z-A)
+      label_short: Nome ↓
+    balance_asc:
+      label: Saldo (Menor para Maior)
+      label_short: Saldo ↑
+    balance_desc:
+      label: Saldo (Maior para Menor)
+      label_short: Saldo ↓

@@ -1,0 +1,29 @@
+pt-BR:
+  coinstats_items:
+    create:
+      success: Conexão com CoinStats configurada com sucesso.
+      default_name: Conexão CoinStats
+      errors:
+        validation_failed: "Falha na validação: %{message}."
+    update:
+      success: Conexão com CoinStats atualizada com sucesso.
+      errors:
+        validation_failed: "Falha na validação: %{message}."
+    destroy:
+      success: Conexão com CoinStats agendada para exclusão.
+    link_wallet:
+      success: "%{count} carteira(s) cripto vinculada(s) com sucesso."
+      missing_params: "Parâmetros obrigatórios faltando: endereço e blockchain."
+      failed: Falha ao vincular carteira cripto.
+      error: "Falha ao vincular carteira cripto: %{message}."
+    new:
+      title: Vincular uma Carteira Cripto com CoinStats
+      blockchain_fetch_error: Falha ao carregar Blockchains. Tente novamente mais tarde.
+      address_label: Endereço
+      address_placeholder: Obrigatório
+      blockchain_label: Blockchain
+      blockchain_placeholder: Obrigatório
+      blockchain_select_blank: Selecione uma Blockchain
+      link: Vincular Carteira Cripto
+      not_configured_title: Conexão com CoinStats não configurada
+      not_configured_message: Para vincular uma carteira cripto, você deve primeiro configurar a conexão com CoinStats.

@@ -133,6 +133,7 @@ Rails.application.routes.draw do
 
   resource :registration, only: %i[new create]
   resources :sessions, only: %i[index new create destroy]
+  get "/auth/sso", to: "auth/sso#callback"  # SSO from Fluxo app (JWT-based iframe login)
   get "/auth/mobile/:provider", to: "sessions#mobile_sso_start"
   match "/auth/:provider/callback", to: "sessions#openid_connect", via: %i[get post]
   match "/auth/failure", to: "sessions#failure", via: %i[get post]
@@ -387,6 +388,7 @@ Rails.application.routes.draw do
       resources :imports, only: [ :index, :show, :create ]
       resource :usage, only: [ :show ], controller: :usage
       post :sync, to: "sync#create"
+      resource :preferences, only: %i[show update], controller: :preferences  # Fluxo: sync user preferences via API
 
       resources :chats, only: [ :index, :show, :create, :update, :destroy ] do
         resources :messages, only: [ :create ] do

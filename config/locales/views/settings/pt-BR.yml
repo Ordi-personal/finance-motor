@@ -1,9 +1,5 @@
 ---
 pt-BR:
-  views:
-    settings:
-      payments:
-        renewal: "Sua contribuição continua em %{date}."
   settings:
     ai_prompts:
       show:
@@ -20,10 +16,10 @@ pt-BR:
         merchant_detector:
           title: Detector de Estabelecimentos
           subtitle: A IA identifica e enriquece dados de transações com informações do estabelecimento
-    payments:
+    billings:
       show:
-        page_title: Pagamento
-        subscription_subtitle: Atualize sua assinatura e detalhes de pagamento
+        page_title: Cobrança
+        subscription_subtitle: Atualize sua assinatura e detalhes de cobrança
         subscription_title: Gerenciar assinatura
     preferences:
       show:
@@ -33,8 +29,8 @@ pt-BR:
         general_subtitle: Configure suas preferências
         general_title: Geral
         default_period: Período Padrão
+        default_account_order: Ordem Padrão das Contas
         language: Idioma
-        language_auto: Idioma do navegador
         page_title: Preferências
         theme_dark: Escuro
         theme_light: Claro
@@ -42,6 +38,7 @@ pt-BR:
         theme_system: Sistema
         theme_title: Tema
         timezone: Fuso horário
+        translations_note: Por favor, note que ainda estamos trabalhando nas traduções para vários idiomas.
     profiles:
       destroy:
         cannot_remove_self: Você não pode se remover da conta.
@@ -91,12 +88,11 @@ pt-BR:
     settings_nav:
       accounts_label: Contas
       api_key_label: Chave da API
-      payment_label: Pagamento
+      billing_label: Cobrança
       categories_label: Categorias
       feedback_label: Feedback
       general_section_title: Geral
       imports_label: Importações
-      exports_label: Exportações
       logout: Sair
       merchants_label: Comerciantes
       other_section_title: Mais

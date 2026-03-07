@@ -1,0 +1,54 @@
+---
+pt-BR:
+  periods:
+    last_day:
+      label: Último Dia
+      label_short: 1D
+      comparison_label: vs. ontem
+    current_week:
+      label: Semana Atual
+      label_short: STD
+      comparison_label: vs. início da semana
+    last_7_days:
+      label: Últimos 7 Dias
+      label_short: 7D
+      comparison_label: vs. semana passada
+    current_month:
+      label: Mês Atual
+      label_short: MTD
+      comparison_label: vs. início do mês
+    last_month:
+      label: Mês Anterior
+      label_short: MA
+      comparison_label: vs. mês anterior
+    last_30_days:
+      label: Últimos 30 Dias
+      label_short: 30D
+      comparison_label: vs. últimos 30 dias
+    last_90_days:
+      label: Últimos 90 Dias
+      label_short: 90D
+      comparison_label: vs. último trimestre
+    current_year:
+      label: Ano Atual
+      label_short: ATD
+      comparison_label: vs. início do ano
+    last_365_days:
+      label: Últimos 365 Dias
+      label_short: 365D
+      comparison_label: vs. 1 ano atrás
+    last_5_years:
+      label: Últimos 5 Anos
+      label_short: 5A
+      comparison_label: vs. 5 anos atrás
+    last_10_years:
+      label: Últimos 10 Anos
+      label_short: 10A
+      comparison_label: vs. 10 anos atrás
+    all_time:
+      label: Todo o Período
+      label_short: Todos
+      comparison_label: vs. início
+    custom:
+      label: Período Personalizado
+      label_short: Custom

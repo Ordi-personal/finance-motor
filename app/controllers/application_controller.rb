@@ -3,6 +3,7 @@ class ApplicationController < ActionController::Base
           SelfHostable, StoreLocation, Impersonatable, Breadcrumbable,
           FeatureGuardable, Notifiable, SafePagination
   include Pundit::Authorization
+  include FluxoIntegration # Encapsulates embedded mode logic for Fluxo iframe
 
   include Pagy::Backend
 

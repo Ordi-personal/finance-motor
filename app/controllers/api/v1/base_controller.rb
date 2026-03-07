@@ -38,10 +38,11 @@ class Api::V1::BaseController < ApplicationController
       request.format = :json
     end
 
-    # Authenticate using either OAuth or API key
+    # Authenticate using either OAuth, API key, or internal Fluxo secret
     def authenticate_request!
       return if authenticate_oauth
       return if authenticate_api_key
+      return if authenticate_fluxo_secret
       render_unauthorized unless performed?
     end
 
@@ -155,6 +156,21 @@ class Api::V1::BaseController < ApplicationController
       response.headers["X-RateLimit-Limit"] = usage_info[:rate_limit].to_s
       response.headers["X-RateLimit-Remaining"] = usage_info[:remaining].to_s
       response.headers["X-RateLimit-Reset"] = usage_info[:reset_time].to_s
+    end
+
+    # Minimal bypass for Fluxo internal ecosystem (server-to-server calls)
+    def authenticate_fluxo_secret
+      secret = request.headers["X-Fluxo-Secret"]
+      email  = request.headers["X-User-Email"]
+
+      return false unless secret == "fluxo_internal_secret_key_123" && email.present?
+
+      @current_user = User.find_by(email: email)
+      return false unless @current_user
+
+      @authentication_method = :fluxo_secret
+      setup_current_context_for_api
+      true
     end
 
     # Render unauthorized response

@@ -1,0 +1,5 @@
+pt-BR:
+  securities:
+    combobox:
+      display: "%{symbol} - %{name} (%{exchange})"
+      exchange_label: "%{symbol} (%{exchange})"
