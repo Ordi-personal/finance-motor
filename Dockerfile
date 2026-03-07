@@ -30,7 +30,8 @@ RUN apt-get update -qq \
 
 # Install application gems
 COPY .ruby-version Gemfile Gemfile.lock ./
-RUN bundle install \
+RUN gem install bundler -v "$(grep -A1 'BUNDLED WITH' Gemfile.lock | tail -1 | tr -d ' ')" --no-document \
+    && bundle install \
     && rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git \
     && bundle exec bootsnap precompile --gemfile -j 0
 
