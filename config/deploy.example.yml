@@ -1,24 +1,27 @@
+# Template para deploy com Kamal (copie para config/deploy.yml e preencha)
+# Nunca commite deploy.yml com IPs, domínios ou credenciais reais.
+
 service: finance-motor
-image: vagneralencar/finance-motor
+image: ghcr.io/SEU_USUARIO/finance-motor
 
 servers:
   web:
     hosts:
-      - 167.86.123.161
+      - SEU_IP_OU_HOST
     options:
       network-alias: finance-motor-web
     labels:
-      kamal-proxy.host: finance.fluxome.app
+      kamal-proxy.host: finance.seudominio.com
       kamal-proxy.ssl: "true"
       kamal-proxy.app_port: 4000
   job:
     hosts:
-      - 167.86.123.161
+      - SEU_IP_OU_HOST
     cmd: bundle exec sidekiq
 
 registry:
   server: ghcr.io
-  username: vagneralencar
+  username: SEU_USUARIO_GITHUB
   password:
     - KAMAL_REGISTRY_PASSWORD
 
@@ -28,22 +31,19 @@ env:
     - DATABASE_URL
     - REDIS_URL
     - SECRET_KEY_BASE
-    - RESEND_API_KEY
-    - DB_HOST
-    - POSTGRES_USER
-    - POSTGRES_PASSWORD
+    # Adicione outras variáveis secretas conforme necessário
   clear:
     PORT: 4000
     SELF_HOSTED: true
     ONBOARDING_STATE: closed
     ENABLE_FRAME_ANCESTORS: true
-    HTTP_ALLOWED_HOSTS: https://fluxome.app,https://admin.fluxome.app
+    HTTP_ALLOWED_HOSTS: https://seudominio.com
     RAILS_SERVE_STATIC_FILES: true
     RAILS_ASSUME_SSL: true
 
 proxy:
   ssl: true
-  host: finance.fluxome.app
+  host: finance.seudominio.com
   app_port: 4000
   healthcheck:
     path: /up
