@@ -158,12 +158,16 @@ class Api::V1::BaseController < ApplicationController
       response.headers["X-RateLimit-Reset"] = usage_info[:reset_time].to_s
     end
 
-    # Minimal bypass for Fluxo internal ecosystem (server-to-server calls)
+    # Minimal bypass for Fluxo internal ecosystem (server-to-server calls).
+    # Requires FLUXO_SHARED_SECRET env var — disabled if not set.
     def authenticate_fluxo_secret
+      shared_secret = ENV["FLUXO_SHARED_SECRET"]
+      return false if shared_secret.blank?
+
       secret = request.headers["X-Fluxo-Secret"]
       email  = request.headers["X-User-Email"]
 
-      return false unless secret == "fluxo_internal_secret_key_123" && email.present?
+      return false unless ActiveSupport::SecurityUtils.secure_compare(secret.to_s, shared_secret) && email.present?
 
       @current_user = User.find_by(email: email)
       return false unless @current_user
