@@ -10,6 +10,9 @@ class OnboardingsController < ApplicationController
   def preferences
   end
 
+  def goals
+  end
+
   def trial
   end
 

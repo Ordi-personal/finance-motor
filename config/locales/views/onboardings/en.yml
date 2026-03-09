@@ -3,26 +3,68 @@ en:
   onboardings:
     header:
       sign_out: Log out
-    preferences:
-      currency: Currency
-      date_format: Date format
-      example: Example account
-      locale: Language
-      preview: Preview how data displays based on preferences.
-      submit: Complete
-      subtitle: Let's configure your preferences.
-      title: Configure your preferences
-    profile:
-      country: Country
-      first_name: First Name
-      household_name: Household Name
-      last_name: Last Name
-      profile_image: Profile Image
-      submit: Continue
-      subtitle: Let's complete your profile.
-      title: Let's set up the basics
+      setup: Setup
+      preferences: Preferences
+      goals: Goals
+      start: Start
+    logout:
+      sign_out: Log out
     show:
-      message: We’re really excited you’re here. In the next step we’ll ask you a
+      title: Meet %{product_name}
+      subtitle: Let's complete your profile.
+      message: We're really excited you're here. In the next step we'll ask you a
         few questions to complete your profile and then get you all set up.
       setup: Set up account
-      title: Meet %{product_name}
+      first_name: First Name
+      first_name_placeholder: First Name
+      last_name: Last Name
+      last_name_placeholder: Last Name
+      household_name: Household Name
+      household_name_placeholder: Household Name
+      group_name: Group Name
+      group_name_placeholder: Group Name
+      moniker_prompt: "How do you use %{product_name}?"
+      moniker_family: Family
+      moniker_group: Group
+      country: Country
+      profile_image: Profile Image
+      submit: Continue
+    preferences:
+      title: Configure your preferences
+      subtitle: Let's configure your preferences.
+      example: Example account
+      preview: Preview how data displays based on preferences.
+      color_theme: Color Theme
+      theme_system: System
+      theme_light: Theme Light
+      theme_dark: Theme Dark
+      locale: Language
+      currency: Currency
+      date_format: Date format
+      submit: Complete
+    goals:
+      title: What brings you here?
+      subtitle: "Select one or more goals you have with %{product_name} as your personal finance tool."
+      unified_accounts: See all accounts in one place
+      cashflow: Understand cashflow and spending
+      budgeting: Manage financial plans and budgets
+      partner: Manage finances with a partner
+      investments: Track investments
+      ai_insights: Let AI help understand my finances
+      optimization: Analyze and optimize accounts
+      reduce_stress: Reduce financial stress or anxiety
+      submit: Next
+    trial:
+      title: Try Sure for 45 days
+      data_deletion: Data will be removed afterwards
+      description_html: Starting today, you can thoroughly test the product.<br/>If you like it, self-host it or contribute to keep using it here.
+      try_button: Try Sure for 45 days
+      continue_trial: Continue trial
+      upgrade: Upgrade
+      how_it_works: How it works
+      today: Today
+      today_description: You get 45 days of free access to Sure.
+      in_40_days: In 40 days (%{date})
+      in_40_days_description: We'll send you a reminder to export your data.
+      in_45_days: In 45 days (%{date})
+      in_45_days_description: We'll delete your data — contribute to keep using Sure!

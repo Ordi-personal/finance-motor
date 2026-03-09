@@ -37,6 +37,7 @@ env:
     - SIDEKIQ_WEB_PASSWORD
   clear:
     PORT: 4000
+    PRODUCT_NAME: "Nome do Produto"
     SELF_HOSTED: true
     ONBOARDING_STATE: closed
     ENABLE_FRAME_ANCESTORS: true

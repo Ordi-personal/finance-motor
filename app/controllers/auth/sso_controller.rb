@@ -20,12 +20,12 @@ module Auth
       begin
         payload = JWT.decode(token, secret, true, { algorithm: "HS256" }).first
         
-        # Find or create user by email
         user = User.find_by(email: payload["email"])
         
         if user.nil?
-          # Create user if doesn't exist (for first-time SSO users)
           user = create_sso_user(payload)
+        else
+          ensure_onboarded(user, payload)
         end
 
         if user
@@ -67,33 +67,60 @@ end
     private
 
     def create_sso_user(payload)
+      first = payload["first_name"].presence || payload["email"].split("@").first.titleize
+      last = payload["last_name"].presence || ""
+      locale = payload["locale"].presence || "pt-BR"
+      currency = payload["currency"].presence || "BRL"
+      country = payload["country"].presence || "BR"
+
       User.transaction do
         family = Family.create!(
-          name: "#{payload["email"].split("@").first.titleize}'s Family",
-          locale: "pt-BR",
+          name: "#{first}'s Family",
+          locale: locale,
           date_format: "%d/%m/%Y",
-          currency: "BRL",
-          country: "BR"
+          currency: currency,
+          country: country
         )
 
-        # Bootstrap family with default categories and rules
         Saas::InitialDataService.bootstrap!(family)
 
         user = family.users.create!(
           email: payload["email"],
-          first_name: payload["email"].split("@").first.titleize,
-          last_name: "",
+          first_name: first,
+          last_name: last,
           password: SecureRandom.hex(16),
           onboarded_at: Time.current,
           role: "admin"
         )
         
-        Rails.logger.info("[SSO] Created user #{user.email} with family #{family.name} and default categories")
+        Rails.logger.info("[SSO] Created user #{user.email} with family #{family.name}")
         user
       end
     rescue ActiveRecord::RecordInvalid => e
       Rails.logger.error("[SSO] Failed to create user: #{e.message}")
       nil
+    end
+
+    def ensure_onboarded(user, payload)
+      attrs = {}
+
+      if user.first_name.blank? || user.first_name == user.email.split("@").first.titleize
+        attrs[:first_name] = payload["first_name"] if payload["first_name"].present?
+      end
+      attrs[:last_name] = payload["last_name"] if user.last_name.blank? && payload["last_name"].present?
+      attrs[:onboarded_at] = Time.current if user.onboarded_at.nil?
+
+      family = user.family
+      if family
+        family.update(locale: payload["locale"]) if payload["locale"].present? && family.locale != payload["locale"]
+        family.update(currency: payload["currency"]) if payload["currency"].present? && family.currency != payload["currency"]
+        family.update(country: payload["country"]) if payload["country"].present? && family.country != payload["country"]
+      end
+
+      user.update!(attrs) if attrs.any?
+      Rails.logger.info("[SSO] Ensured onboarding for #{user.email}: #{attrs.keys.join(', ')}") if attrs.any?
+    rescue ActiveRecord::RecordInvalid => e
+      Rails.logger.error("[SSO] Failed to ensure onboarding: #{e.message}")
     end
   end
 end

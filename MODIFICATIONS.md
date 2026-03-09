@@ -156,6 +156,34 @@ The secret is managed via Kamal secrets (`config/deploy.yml` → `env.secret`) a
 
 Upstream `v0.6.8` targets Ruby `3.4.7`. This fork pins the runtime to `3.2.2` for compatibility with the current production environment. A separate Ruby upgrade is planned.
 
+### 12. Onboarding Completeness Fixes
+
+**Files:**
+- `app/controllers/onboardings_controller.rb` (modified)
+- `app/views/onboardings/goals.html.erb` (modified)
+- `app/views/onboardings/show.html.erb` (modified)
+- `app/views/layouts/wizard.html.erb` (modified)
+- `config/locales/views/onboardings/en.yml` (modified)
+- `config/locales/views/onboardings/pt-BR.yml` (modified)
+
+**Type:** Bug Fix / i18n
+**Risk:** Low
+
+- Added missing `goals` action to `OnboardingsController` (route existed but action was absent).
+- Fixed `show.html.erb` to pass `product_name:` interpolation variable to `t(".title")`.
+- Changed goals form from `form_with` to `styled_form_with` with Turbo disabled, matching other onboarding steps.
+- Completed English and pt-BR translations for all onboarding steps (goals, header nav items, placeholders, field labels).
+- Modified wizard layout to hide logo and sign-out button when in embedded mode (`embedded_mode?`).
+
+### 13. SSO Onboarding Auto-Complete
+
+**File:** `app/controllers/auth/sso_controller.rb` (modified)
+
+**Type:** Enhancement
+**Risk:** Low-Medium
+
+SSO callback now ensures existing users have `onboarded_at` set (skipping onboarding) and syncs profile data (first_name, last_name, locale, currency, country) from the JWT payload. New users also receive profile data from the JWT instead of email-derived defaults.
+
 ## What Is NOT Modified
 
 - Core financial calculation engine
