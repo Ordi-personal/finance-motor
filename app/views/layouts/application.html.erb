@@ -6,13 +6,14 @@
     { name: "Intro", path: intro_path, icon: "sparkles", icon_custom: false, active: page_active?(intro_path) }
   ]
 else
-  [
+  items = [
     { name: t(".nav.home"), path: root_path, icon: "pie-chart", icon_custom: false, active: page_active?(root_path) },
     { name: t(".nav.transactions"), path: transactions_path, icon: "credit-card", icon_custom: false, active: page_active?(transactions_path) },
     { name: t(".nav.reports"), path: reports_path, icon: "chart-bar", icon_custom: false, active: page_active?(reports_path) },
-    { name: t(".nav.budgets"), path: budgets_path, icon: "map", icon_custom: false, active: page_active?(budgets_path) },
-    { name: t(".nav.assistant"), path: chats_path, icon: "icon-assistant", icon_custom: true, active: page_active?(chats_path), mobile_only: true }
+    { name: t(".nav.budgets"), path: budgets_path, icon: "map", icon_custom: false, active: page_active?(budgets_path) }
   ]
+  items << { name: t(".nav.assistant"), path: chats_path, icon: "icon-assistant", icon_custom: true, active: page_active?(chats_path), mobile_only: true } unless embedded_mode?
+  items
 end %>
 
 <% desktop_nav_items = mobile_nav_items.reject { |item| item[:mobile_only] } %>
@@ -50,8 +51,12 @@ end %>
         <%= icon("panel-left", as_button: true, data: { action: "app-layout#openMobileSidebar"}) %>
       <% end %>
 
-      <%= link_to home_path, class: "block" do %>
-        <%= image_tag "logomark-color.svg", class: "w-9 h-9 mx-auto" %>
+      <% if embedded_mode? %>
+        <div class="w-9 h-9"></div>
+      <% else %>
+        <%= link_to home_path, class: "block" do %>
+          <%= image_tag "logomark-color.svg", class: "w-9 h-9 mx-auto" %>
+        <% end %>
       <% end %>
 
       <%= render "users/user_menu", user: Current.user, placement: "bottom-end", offset: 12, intro_mode: intro_mode %>
@@ -61,8 +66,12 @@ end %>
     <div class="hidden lg:block">
       <nav class="h-full flex flex-col shrink-0 w-[84px] py-4 mr-3">
         <div class="pl-2 mb-3">
-          <%= link_to home_path, class: "block" do %>
-            <%= image_tag "logomark-color.svg", class: "w-9 h-9 mx-auto" %>
+          <% if embedded_mode? %>
+            <div class="w-9 h-9 mx-auto"></div>
+          <% else %>
+            <%= link_to home_path, class: "block" do %>
+              <%= image_tag "logomark-color.svg", class: "w-9 h-9 mx-auto" %>
+            <% end %>
           <% end %>
         </div>
 
@@ -138,7 +147,7 @@ end %>
               <%= render "layouts/shared/breadcrumbs", breadcrumbs: @breadcrumbs %>
             <% end %>
           </div>
-          <%= icon("panel-right", as_button: true, data: { action: "app-layout#toggleRightSidebar" }) %>
+          <%= icon("panel-right", as_button: true, data: { action: "app-layout#toggleRightSidebar" }) unless embedded_mode? %>
         </div>
       <% end %>
 
@@ -149,7 +158,8 @@ end %>
       <%= yield %>
     <% end %>
 
-    <%# DESKTOP - Right sidebar %>
+    <%# DESKTOP - Right sidebar (hidden when embedded in Fluxo) %>
+    <% unless embedded_mode? %>
     <%= tag.div class: class_names(
           "hidden lg:block h-full overflow-y-auto shrink-0 max-w-[400px] transition-all duration-300",
           Current.user.show_ai_sidebar? ? expanded_sidebar_class : collapsed_sidebar_class,
@@ -170,6 +180,7 @@ end %>
           </div>
         <% end %>
       <% end %>
+    <% end %>
     <% end %>
 
     <%# MOBILE - Bottom Nav %>

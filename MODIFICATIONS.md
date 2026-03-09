@@ -156,7 +156,20 @@ The secret is managed via Kamal secrets (`config/deploy.yml` → `env.secret`) a
 
 Upstream `v0.6.8` targets Ruby `3.4.7`. This fork pins the runtime to `3.2.2` for compatibility with the current production environment. A separate Ruby upgrade is planned.
 
-### 12. Onboarding Completeness Fixes
+### 12. Embedded Mode: Hide Logo and Chat Sidebar
+
+**File:** `app/views/layouts/application.html.erb` (modified)
+
+**Type:** Integration
+**Risk:** Low
+
+When running inside the Fluxo iframe (`embedded_mode?`), the main application layout now:
+- Hides the Sure logo (replaced with empty space) in both mobile and desktop nav
+- Hides the entire right sidebar (AI chat / "Enable AI Chats")
+- Hides the panel-right toggle button
+- Removes the "Assistente" item from mobile bottom nav
+
+### 13. Onboarding Completeness Fixes
 
 **Files:**
 - `app/controllers/onboardings_controller.rb` (modified)
@@ -175,7 +188,7 @@ Upstream `v0.6.8` targets Ruby `3.4.7`. This fork pins the runtime to `3.2.2` fo
 - Completed English and pt-BR translations for all onboarding steps (goals, header nav items, placeholders, field labels).
 - Modified wizard layout to hide logo and sign-out button when in embedded mode (`embedded_mode?`).
 
-### 13. SSO Onboarding Auto-Complete
+### 14. SSO Onboarding Auto-Complete
 
 **File:** `app/controllers/auth/sso_controller.rb` (modified)
 
