@@ -194,6 +194,8 @@ class Api::V1::BaseController < ApplicationController
         doorkeeper_token&.scopes&.to_a || []
       when :api_key
         @api_key&.scopes || []
+      when :fluxo_secret
+        [ "read", "write", "read_write" ]
       else
         []
       end
