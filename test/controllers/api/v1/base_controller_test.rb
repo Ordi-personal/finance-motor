@@ -398,6 +398,17 @@ class Api::V1::BaseControllerTest < ActionDispatch::IntegrationTest
     assert response_body["details"]["reset_in_seconds"] > 0
   end
 
+  test "should reject fluxo secret auth for non-allowlisted paths" do
+    with_env_overrides("FLUXO_SHARED_SECRET" => "shared-secret") do
+      get "/api/v1/test", headers: {
+        "X-Fluxo-Secret" => "shared-secret",
+        "X-User-Email" => @user.email
+      }
+    end
+
+    assert_response :unauthorized
+  end
+
   test "rate limiting should be per API key" do
     # Create a second user for independent API keys
     other_user = users(:family_member)
