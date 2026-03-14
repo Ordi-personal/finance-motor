@@ -659,4 +659,56 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_response :success
   end
+
+  test "sso callback rejects token with wrong audience" do
+    secret = "test-sso-secret"
+    token = JWT.encode(
+      {
+        email: @user.email,
+        first_name: "Bob",
+        last_name: "Dylan",
+        iss: "fluxo-app",
+        aud: "wrong-audience",
+        jti: SecureRandom.uuid,
+        exp: 5.minutes.from_now.to_i
+      },
+      secret,
+      "HS256"
+    )
+
+    with_env_overrides("SSO_SECRET_KEY" => secret) do
+      get "/auth/sso", params: { token: token }
+    end
+
+    assert_redirected_to new_session_path
+    assert_equal "Invalid SSO token", flash[:alert]
+  end
+
+  test "sso callback rejects replayed token" do
+    secret = "test-sso-secret"
+    jti = SecureRandom.uuid
+    token = JWT.encode(
+      {
+        email: @user.email,
+        first_name: "Bob",
+        last_name: "Dylan",
+        iss: "fluxo-app",
+        aud: "sure-sso",
+        jti: jti,
+        exp: 5.minutes.from_now.to_i
+      },
+      secret,
+      "HS256"
+    )
+
+    with_env_overrides("SSO_SECRET_KEY" => secret) do
+      Rails.cache.write("sso:jti:#{jti}", true, expires_in: 5.minutes)
+      get "/auth/sso", params: { token: token }
+    end
+
+    assert_redirected_to new_session_path
+    assert_equal "Invalid SSO token", flash[:alert]
+  ensure
+    Rails.cache.delete("sso:jti:#{jti}") if jti.present?
+  end
 end

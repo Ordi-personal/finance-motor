@@ -164,6 +164,8 @@ class Api::V1::BaseController < ApplicationController
       shared_secret = ENV["FLUXO_SHARED_SECRET"]
       return false if shared_secret.blank?
 
+      return false unless fluxo_internal_request_allowed?
+
       secret = request.headers["X-Fluxo-Secret"]
       email  = request.headers["X-User-Email"]
 
@@ -175,6 +177,13 @@ class Api::V1::BaseController < ApplicationController
       @authentication_method = :fluxo_secret
       setup_current_context_for_api
       true
+    end
+
+    def fluxo_internal_request_allowed?
+      return true if request.path == "/api/v1/preferences"
+
+      Rails.logger.warn("Fluxo internal auth rejected for path #{request.path}")
+      false
     end
 
     # Render unauthorized response
