@@ -703,14 +703,13 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     )
 
     with_env_overrides("SSO_SECRET_KEY" => secret) do
-      Rails.cache.stubs(:exist?).with(cache_key).returns(true)
+      Rails.cache.write(cache_key, true, expires_in: 5.minutes)
       get "/auth/sso", params: { token: token }
     end
 
     assert_redirected_to new_session_path
     assert_equal "Invalid SSO token", flash[:alert]
   ensure
-    Rails.cache.unstub(:exist?)
     Rails.cache.delete(cache_key) if defined?(cache_key) && cache_key.present?
   end
 end
