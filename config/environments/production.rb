@@ -77,7 +77,7 @@ Rails.application.configure do
   config.action_mailer.perform_caching = false
   config.action_mailer.deliver_later_queue_name = :high_priority
   mailer_host = HostListParser.first_host(ENV["APP_DOMAIN"], ENV["HTTP_ALLOWED_HOSTS"])
-  config.action_mailer.default_url_options = { host: mailer_host } if mailer_host
+  config.action_mailer.default_url_options = { host: mailer_host, protocol: "https" } if mailer_host
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
     address:   ENV["SMTP_ADDRESS"],
