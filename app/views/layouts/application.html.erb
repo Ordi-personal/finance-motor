@@ -15,11 +15,9 @@ else
   items << { name: t(".nav.assistant"), path: chats_path, icon: "icon-assistant", icon_custom: true, active: page_active?(chats_path), mobile_only: true } unless embedded_mode?
   items
 end %>
-
 <% desktop_nav_items = mobile_nav_items.reject { |item| item[:mobile_only] } %>
 <% expanded_sidebar_class = "w-full" %>
 <% collapsed_sidebar_class = "w-0" %>
-
 <%= render "layouts/shared/htmldoc" do %>
   <div
     class="flex flex-col lg:flex-row h-full bg-surface"
@@ -35,7 +33,6 @@ end %>
           <%= icon("x", as_button: true, data: { action: "app-layout#closeMobileSidebar" }) %>
         </div>
       <% end %>
-
       <%= render(
         "accounts/account_sidebar_tabs",
         family: Current.family,
@@ -43,14 +40,12 @@ end %>
         mobile: true
       ) %>
     </div>
-
     <%# MOBILE - Top nav %>
     <nav class="lg:hidden flex justify-between items-center p-3 pt-[calc(env(safe-area-inset-top)+0.75rem)]">
       <% if intro_mode %>
       <% else %>
         <%= icon("panel-left", as_button: true, data: { action: "app-layout#openMobileSidebar"}) %>
       <% end %>
-
       <% if embedded_mode? %>
         <div class="w-9 h-9"></div>
       <% else %>
@@ -58,10 +53,8 @@ end %>
           <%= image_tag "logomark-color.svg", class: "w-9 h-9 mx-auto" %>
         <% end %>
       <% end %>
-
       <%= render "users/user_menu", user: Current.user, placement: "bottom-end", offset: 12, intro_mode: intro_mode %>
     </nav>
-
     <%# DESKTOP - Left navbar %>
     <div class="hidden lg:block">
       <nav class="h-full flex flex-col shrink-0 w-[84px] py-4 mr-3">
@@ -74,7 +67,6 @@ end %>
             <% end %>
           <% end %>
         </div>
-
         <ul class="space-y-0.5">
           <% desktop_nav_items.reject { |item| item[:mobile_only] }.each do |nav_item| %>
             <li>
@@ -82,7 +74,6 @@ end %>
             </li>
           <% end %>
         </ul>
-
         <div class="pl-2 mt-auto mx-auto flex flex-col gap-2">
           <%= render DS::Link.new(
             variant: "icon",
@@ -90,12 +81,10 @@ end %>
             href: "https://discord.gg/36ZGBsxYEK",
             target: "_blank"
           ) %>
-
           <%= render "users/user_menu", user: Current.user, intro_mode: intro_mode %>
         </div>
       </nav>
     </div>
-
     <%# DESKTOP - Left sidebar %>
     <%= tag.div class: class_names(
         "hidden lg:block py-4 overflow-y-auto shrink-0 max-w-[320px] transition-all duration-300",
@@ -109,7 +98,6 @@ end %>
           <div class="overflow-y-auto grow">
             <%= render "accounts/account_sidebar_tabs", family: Current.family, active_tab: @account_group_tab %>
           </div>
-
           <% if Current.family.trialing? && !self_hosted? %>
             <div class="px-4 py-3 space-y-4 bg-container shadow-border-xs rounded-xl">
               <div class="flex items-start justify-between">
@@ -117,13 +105,11 @@ end %>
                   <p class="text-sm font-medium text-primary"><%= t("layouts.trial.open_demo") %></p>
                   <p class="text-sm text-secondary"><%= t("layouts.trial.data_deleted_in_days", days: Current.family.days_left_in_trial) %></p>
                 </div>
-
                 <%= render DS::Link.new(
                   text: t("layouts.trial.contribute"),
                   href: upgrade_subscription_path,
                 ) %>
               </div>
-
               <div class="flex items-center gap-0.5 h-1.5">
                 <div class="h-full bg-warning rounded-full" style="width: <%= Current.family.percentage_of_trial_completed %>%"></div>
                 <div class="h-full bg-surface-inset rounded-full" style="width: <%= Current.family.percentage_of_trial_remaining %>%"></div>
@@ -133,14 +119,12 @@ end %>
         </div>
       <% end %>
     <% end %>
-
     <%# SHARED - Main content %>
     <%= tag.main class: class_names("grow overflow-y-auto px-3 lg:px-10 w-full mx-auto pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0"), data: { app_layout_target: "content", viewport_target: "content" } do %>
       <% unless intro_mode %>
         <div class="hidden lg:flex gap-2 items-center justify-between mb-6 sticky top-0 z-10 -mx-3 lg:-mx-10 px-3 lg:px-10 py-4 bg-surface border-b border-tertiary">
           <div class="flex items-center gap-2">
             <%= icon("panel-left", as_button: true, data: { action: "app-layout#toggleLeftSidebar" }) %>
-
             <% if content_for?(:breadcrumbs) %>
               <%= yield :breadcrumbs %>
             <% else %>
@@ -150,39 +134,34 @@ end %>
           <%= icon("panel-right", as_button: true, data: { action: "app-layout#toggleRightSidebar" }) unless embedded_mode? %>
         </div>
       <% end %>
-
       <% if content_for?(:page_header) %>
         <%= yield :page_header %>
       <% end %>
-
       <%= yield %>
     <% end %>
-
-    <%# DESKTOP - Right sidebar (hidden when embedded in Fluxo) %>
+    <%# DESKTOP - Right sidebar (hidden when embedded in Ordi) %>
     <% unless embedded_mode? %>
-    <%= tag.div class: class_names(
+      <%= tag.div class: class_names(
           "hidden lg:block h-full overflow-y-auto shrink-0 max-w-[400px] transition-all duration-300",
           Current.user.show_ai_sidebar? ? expanded_sidebar_class : collapsed_sidebar_class,
         ),
         data: { app_layout_target: "rightSidebar" } do %>
-      <%= tag.div id: "chat-container", class: "relative h-full", data: { controller: "chat hotkey", turbo_permanent: true } do %>
-        <div class="flex flex-col h-full justify-between shrink-0">
-          <%= turbo_frame_tag chat_frame, src: chat_view_path(@chat), loading: "lazy", class: "h-full" do %>
-            <div class="flex justify-center items-center h-full">
-              <%= icon("loader-circle", class: "animate-spin") %>
+        <%= tag.div id: "chat-container", class: "relative h-full", data: { controller: "chat hotkey", turbo_permanent: true } do %>
+          <div class="flex flex-col h-full justify-between shrink-0">
+            <%= turbo_frame_tag chat_frame, src: chat_view_path(@chat), loading: "lazy", class: "h-full" do %>
+              <div class="flex justify-center items-center h-full">
+                <%= icon("loader-circle", class: "animate-spin") %>
+              </div>
+            <% end %>
+          </div>
+          <% unless Current.user.ai_enabled? %>
+            <div class="absolute backdrop-blur-lg inset-0 h-full w-full flex flex-col justify-center items-center pl-0.5 pr-4">
+              <%= render "chats/ai_consent" %>
             </div>
           <% end %>
-        </div>
-
-        <% unless Current.user.ai_enabled? %>
-          <div class="absolute backdrop-blur-lg inset-0 h-full w-full flex flex-col justify-center items-center pl-0.5 pr-4">
-            <%= render "chats/ai_consent" %>
-          </div>
         <% end %>
       <% end %>
     <% end %>
-    <% end %>
-
     <%# MOBILE - Bottom Nav %>
     <%= tag.nav class: "lg:hidden fixed bottom-0 left-0 right-0 bg-surface z-10 border-t border-tertiary flex justify-around pb-[env(safe-area-inset-bottom)]",
       data: { viewport_target: "bottomNav" } do %>

@@ -1,6 +1,5 @@
 <% if @newly_created && @plain_key %>
   <%= content_for :page_title, "API Key Created Successfully" %>
-
   <div class="bg-container rounded-xl shadow-border-xs p-4">
     <div class="space-y-4">
       <div class="p-3 shadow-border-xs bg-container rounded-lg">
@@ -17,11 +16,9 @@
           </div>
         </div>
       </div>
-
       <div class="bg-surface-inset rounded-xl p-4">
         <h4 class="font-medium text-primary mb-3">Your API Key</h4>
         <p class="text-secondary text-sm mb-3">Copy and store this key securely. You'll need it to authenticate your API requests.</p>
-
         <div class="bg-container rounded-lg p-3 border border-primary" data-controller="clipboard">
           <div class="flex items-center justify-between gap-3">
             <code id="api-key-display" class="font-mono text-sm text-primary break-all" data-clipboard-target="source"><%= @current_api_key.plain_key %></code>
@@ -34,7 +31,6 @@
           </div>
         </div>
       </div>
-
       <div class="bg-surface-inset rounded-xl p-4">
         <h4 class="font-medium text-primary mb-3">How to use your API key</h4>
         <p class="text-secondary text-sm mb-3">Include your API key in the X-Api-Key header when making requests:</p>
@@ -42,7 +38,6 @@
           curl -H "X-Api-Key: <%= @current_api_key.plain_key %>" <%= request.base_url %>/api/v1/accounts
         </div>
       </div>
-
       <div class="flex justify-end pt-4 border-t border-primary">
         <%= render DS::Link.new(
           text: "Continue to API Key Settings",
@@ -61,7 +56,6 @@
       variant: "secondary"
     ) %>
   <% end %>
-
   <div class="bg-container rounded-xl shadow-border-xs p-4">
     <div class="space-y-4">
       <div class="p-3 shadow-border-xs bg-container rounded-lg flex justify-between items-center">
@@ -71,7 +65,6 @@
             rounded: true,
             size: "lg"
           ) %>
-
           <div class="text-sm space-y-1">
             <p class="text-primary font-medium"><%= @current_api_key.name %></p>
             <p class="text-secondary">
@@ -84,12 +77,10 @@
             </p>
           </div>
         </div>
-
         <div class="rounded-md bg-success px-2 py-1">
           <p class="text-success-foreground font-medium text-xs">Active</p>
         </div>
       </div>
-
       <div class="bg-surface-inset rounded-xl p-4">
         <h4 class="font-medium text-primary mb-3">Permissions</h4>
         <div class="flex flex-wrap gap-2">
@@ -105,11 +96,9 @@
           <% end %>
         </div>
       </div>
-
       <div class="bg-surface-inset rounded-xl p-4">
         <h4 class="font-medium text-primary mb-3">Your API Key</h4>
         <p class="text-secondary text-sm mb-3">Copy and store this key securely. You'll need it to authenticate your API requests.</p>
-
         <div class="bg-container rounded-lg p-3 border border-primary" data-controller="clipboard">
           <div class="flex items-center justify-between gap-3">
             <code id="api-key-display" class="font-mono text-sm text-primary break-all" data-clipboard-target="source"><%= @current_api_key.plain_key %></code>
@@ -122,7 +111,6 @@
           </div>
         </div>
       </div>
-
       <div class="bg-surface-inset rounded-xl p-4">
         <h4 class="font-medium text-primary mb-3">How to use your API key</h4>
         <p class="text-secondary text-sm mb-3">Include your API key in the X-Api-Key header when making requests:</p>
@@ -130,7 +118,6 @@
           curl -H "X-Api-Key: <%= @current_api_key.plain_key %>" <%= request.base_url %>/api/v1/accounts
         </div>
       </div>
-
       <div class="flex justify-end pt-4 border-t border-primary">
         <%= render DS::Button.new(
           text: "Revoke Key",
@@ -153,7 +140,6 @@
       variant: "primary"
     ) %>
   <% end %>
-
   <div class="bg-container rounded-xl shadow-border-xs p-4">
     <div class="space-y-4">
       <div class="p-3 shadow-border-xs bg-container rounded-lg">
@@ -165,11 +151,10 @@
           ) %>
           <div class="flex-1">
             <h3 class="font-medium text-primary"><%= t(".no_api_key.heading", product_name: product_name) %></h3>
-            <p class="text-secondary text-sm mt-1"><%= t(".no_api_key.description") %></p>
+            <p class="text-secondary text-sm mt-1"><%= t(".no_api_key.description", product_name: product_name) %></p>
           </div>
         </div>
       </div>
-
       <div class="bg-surface-inset rounded-xl p-4">
         <h4 class="font-medium text-primary mb-3"><%= t(".no_api_key.what_you_can_do") %></h4>
         <ul class="space-y-2 text-sm text-secondary">
@@ -187,7 +172,6 @@
           </li>
         </ul>
       </div>
-
       <div class="bg-surface-inset rounded-xl p-4">
         <h4 class="font-medium text-primary mb-2"><%= t(".no_api_key.security_note_title") %></h4>
         <p class="text-secondary text-sm"><%= t(".no_api_key.security_note") %></p>

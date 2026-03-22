@@ -1,9 +1,12 @@
 ---
 pt-BR:
   password_resets:
+    disabled: "A redefinição de senha via %{product_name} está desativada. Redefina sua senha por meio do seu provedor de identidade."
+    sso_only_user: Sua conta usa SSO para autenticação. Entre em contato com seu administrador para gerenciar suas credenciais.
     edit:
       title: Redefinir senha
     new:
+      back: Voltar
       requested: Por favor, verifique seu e-mail para um link para redefinir sua senha.
       submit: Redefinir senha
       title: Redefinir senha

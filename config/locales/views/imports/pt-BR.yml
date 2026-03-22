@@ -62,6 +62,12 @@ pt-BR:
         instructions_5: Sem vírgulas (para separar milhares), sem símbolos de moeda e sem parênteses em números.
         title: Importar seus dados
   imports:
+    document_types:
+      bank_statement: Extrato bancário
+      credit_card_statement: Fatura do cartão
+      investment_statement: Extrato de investimentos
+      other: Outro documento
+      unknown: Documento desconhecido
     empty:
       message: Nenhuma importação ainda.
       new: Nova Importação

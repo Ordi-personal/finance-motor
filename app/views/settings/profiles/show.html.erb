@@ -1,30 +1,24 @@
 <%= content_for :page_title, t(".page_title") %>
-
 <%= settings_section title: t(".profile_title"), subtitle: t(".profile_subtitle", product_name: product_name) do %>
   <%= styled_form_with model: @user, url: user_path(@user), class: "space-y-4" do |form| %>
     <%= render "settings/user_avatar_field", form: form, user: @user %>
-
     <div>
       <%= form.email_field :email, placeholder: t(".email"), label: t(".email") %>
-
       <% if @user.unconfirmed_email.present? %>
         <p class="mt-2 text-sm text-gray-600">
           You have requested to change your email to <%= @user.unconfirmed_email %>. Please go to your email and confirm for the change to take effect. If you haven't received the email, please check your spam folder, or <%= link_to "request a new confirmation email", resend_confirmation_email_user_path(@user), class: "hover:underline text-secondary" %>.
         </p>
       <% end %>
-
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
         <%= form.text_field :first_name, placeholder: t(".first_name"), label: t(".first_name") %>
         <%= form.text_field :last_name, placeholder: t(".last_name"), label: t(".last_name") %>
       </div>
-
       <div class="flex justify-end mt-4">
         <%= render DS::Button.new(text: t(".save"), class: "md:w-auto w-full justify-center") %>
       </div>
     </div>
   <% end %>
 <% end %>
-
 <% unless Current.user.ui_layout_intro? %>
   <%= settings_section title: family_moniker == "Group" ? t(".group_title", default: "Group") : t(".household_title"), subtitle: t(".household_subtitle", moniker_plural: family_moniker_plural_downcase, moniker: family_moniker_downcase) do %>
     <div class="space-y-4">
@@ -99,7 +93,6 @@
                     </button>
                   </div>
                 <% end %>
-
                 <% if Current.user.admin? %>
                   <%= render DS::Button.new(
                     variant: "icon",
@@ -125,7 +118,6 @@
     </div>
   <% end %>
 <% end %>
-
 <%= settings_section title: t(".danger_zone_title") do %>
   <div class="space-y-4">
     <% if Current.user.admin? %>
@@ -134,7 +126,6 @@
           <h3 class="font-medium text-primary"><%= t(".reset_account") %></h3>
           <p class="text-secondary text-sm"><%= t(".reset_account_warning") %></p>
         </div>
-
         <%= render DS::Button.new(
           text: t(".reset_account"),
           variant: "destructive",
@@ -149,13 +140,11 @@
           )
         ) %>
       </div>
-
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div class="w-full md:w-2/3">
           <h3 class="font-medium text-primary"><%= t(".reset_account_with_sample_data") %></h3>
-          <p class="text-secondary text-sm"><%= t(".reset_account_with_sample_data_warning") %></p>
+          <p class="text-secondary text-sm"><%= t(".reset_account_with_sample_data_warning", product_name: product_name) %></p>
         </div>
-
         <%= render DS::Button.new(
           text: t(".reset_account_with_sample_data"),
           variant: "destructive",
@@ -163,7 +152,7 @@
           method: :delete,
           confirm: CustomConfirm.new(
             title: t(".confirm_reset_with_sample_data.title"),
-            body: t(".confirm_reset_with_sample_data.body"),
+            body: t(".confirm_reset_with_sample_data.body", product_name: product_name),
             btn_text: t(".reset_account_with_sample_data"),
             destructive: true,
             high_severity: true
@@ -176,7 +165,6 @@
         <h3 class="font-medium text-primary"><%= t(".delete_account") %></h3>
         <p class="text-secondary text-sm"><%= t(".delete_account_warning") %></p>
       </div>
-
       <%= render DS::Button.new(
         text: t(".delete_account"),
         variant: "destructive",

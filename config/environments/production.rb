@@ -1,4 +1,5 @@
 require "active_support/core_ext/integer/time"
+require Rails.root.join("lib/host_list_parser").to_s
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
@@ -75,7 +76,8 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
   config.action_mailer.deliver_later_queue_name = :high_priority
-  config.action_mailer.default_url_options = { host: ENV["APP_DOMAIN"] }
+  mailer_host = HostListParser.first_host(ENV["APP_DOMAIN"], ENV["HTTP_ALLOWED_HOSTS"])
+  config.action_mailer.default_url_options = { host: mailer_host } if mailer_host
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
     address:   ENV["SMTP_ADDRESS"],
@@ -100,12 +102,11 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   # Enable DNS rebinding protection and other `Host` header attacks.
-  # config.hosts = [
-  #   "example.com",     # Allow requests from example.com
-  #   /.*\.example\.com/ # Allow requests from subdomains like `www.example.com`
-  # ]
-  # Skip DNS rebinding protection for the default health check endpoint.
-  # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+  allowed_hosts = HostListParser.parse_hosts(ENV["HTTP_ALLOWED_HOSTS"], ENV["APP_DOMAIN"])
+  if allowed_hosts.any?
+    allowed_hosts.each { |host| config.hosts << host }
+    config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+  end
 
   # set REDIS_URL for Sidekiq to use Redis
   config.active_job.queue_adapter = :sidekiq

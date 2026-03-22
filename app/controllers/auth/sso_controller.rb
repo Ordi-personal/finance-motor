@@ -20,7 +20,7 @@ module Auth
       begin
     payload = JWT.decode(token, secret, true, {
       algorithm: "HS256",
-      iss: "fluxo-app",
+      iss: "ordi-app",
       verify_iss: true,
       aud: "sure-sso",
       verify_aud: true

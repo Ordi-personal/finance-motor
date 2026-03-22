@@ -38,11 +38,11 @@ class Api::V1::BaseController < ApplicationController
       request.format = :json
     end
 
-    # Authenticate using either OAuth, API key, or internal Fluxo secret
+    # Authenticate using either OAuth, API key, or the internal Ordi secret
     def authenticate_request!
       return if authenticate_oauth
       return if authenticate_api_key
-      return if authenticate_fluxo_secret
+      return if authenticate_ordi_secret
       render_unauthorized unless performed?
     end
 
@@ -158,15 +158,15 @@ class Api::V1::BaseController < ApplicationController
       response.headers["X-RateLimit-Reset"] = usage_info[:reset_time].to_s
     end
 
-    # Minimal bypass for Fluxo internal ecosystem (server-to-server calls).
-    # Requires FLUXO_SHARED_SECRET env var — disabled if not set.
-    def authenticate_fluxo_secret
-      shared_secret = ENV["FLUXO_SHARED_SECRET"]
+    # Minimal bypass for Ordi internal ecosystem (server-to-server calls).
+    # Requires ORDI_SHARED_SECRET env var — disabled if not set.
+    def authenticate_ordi_secret
+      shared_secret = ENV["ORDI_SHARED_SECRET"]
       return false if shared_secret.blank?
 
-      return false unless fluxo_internal_request_allowed?
+      return false unless ordi_internal_request_allowed?
 
-      secret = request.headers["X-Fluxo-Secret"]
+      secret = request.headers["X-Ordi-Secret"]
       email  = request.headers["X-User-Email"]
 
       return false unless ActiveSupport::SecurityUtils.secure_compare(secret.to_s, shared_secret) && email.present?
@@ -174,15 +174,15 @@ class Api::V1::BaseController < ApplicationController
       @current_user = User.find_by(email: email)
       return false unless @current_user
 
-      @authentication_method = :fluxo_secret
+      @authentication_method = :ordi_secret
       setup_current_context_for_api
       true
     end
 
-    def fluxo_internal_request_allowed?
+    def ordi_internal_request_allowed?
       return true if request.path == "/api/v1/preferences"
 
-      Rails.logger.warn("Fluxo internal auth rejected for path #{request.path}")
+      Rails.logger.warn("Ordi internal auth rejected for path #{request.path}")
       false
     end
 
@@ -203,7 +203,7 @@ class Api::V1::BaseController < ApplicationController
         doorkeeper_token&.scopes&.to_a || []
       when :api_key
         @api_key&.scopes || []
-      when :fluxo_secret
+      when :ordi_secret
         [ "read", "write", "read_write" ]
       else
         []

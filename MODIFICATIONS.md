@@ -25,7 +25,7 @@ This fork complies with AGPL-3.0 Section 13 by:
 | Field | Value |
 |-------|-------|
 | **Fork Repository** | https://github.com/Ordi-personal/finance-motor |
-| **Maintained By** | Ordi / Fluxo Team |
+| **Maintained By** | Ordi Team |
 | **Fork Date** | May 2024 |
 | **Last Upstream Sync** | March 7, 2026 (v0.6.8) |
 
@@ -116,11 +116,11 @@ Pass current timezone to `timezone_options` helper to ensure the selected timezo
 **Type:** New Feature
 **Risk:** Medium
 
-Single sign-on endpoint allowing the Fluxo App to authenticate users into the embedded iframe via a short-lived JWT token. The token is signed with `RAILS_MASTER_KEY`-derived secret, validated on arrival, and exchanged for a Rails session.
+Single sign-on endpoint allowing the Ordi App to authenticate users into the embedded iframe via a short-lived JWT token. The token is signed with `RAILS_MASTER_KEY`-derived secret, validated on arrival, and exchanged for a Rails session.
 
 - `GET /auth/sso?token=<jwt>` — Validates JWT and logs the user in
 
-### 9. Fluxo Embedded Mode (FluxoIntegration concern)
+### 9. Embedded Mode (`FluxoIntegration` concern)
 
 **Files:**
 - `app/controllers/concerns/fluxo_integration.rb` (new)
@@ -129,16 +129,16 @@ Single sign-on endpoint allowing the Fluxo App to authenticate users into the em
 **Type:** Integration
 **Risk:** Low
 
-Extracted embedded-mode logic into a Rails concern so that all controllers can detect whether the app is running inside the Fluxo iframe (`session[:embedded_mode]`). Uses `helper_method :embedded_mode?` to expose the state to views. This replaced a previous `Current.embedded` attribute that was removed in upstream `v0.6.8`.
+Extracted embedded-mode logic into a Rails concern so that all controllers can detect whether the app is running inside the Ordi iframe (`session[:embedded_mode]`). Uses `helper_method :embedded_mode?` to expose the state to views. This replaced a previous `Current.embedded` attribute that was removed in upstream `v0.6.8`.
 
-### 10. Fluxo Secret Server-to-Server Auth
+### 10. Server-to-Server Auth (`X-Fluxo-Secret`)
 
 **File:** `app/controllers/api/v1/base_controller.rb` (modified)
 
 **Type:** Security / Integration
 **Risk:** Medium
 
-Added a minimal bypass in the API base controller that allows the Fluxo App to authenticate server-to-server requests without a user JWT. The bypass requires:
+Added a minimal bypass in the API base controller that allows the Ordi App to authenticate server-to-server requests without a user JWT. The bypass requires:
 
 1. `X-Fluxo-Secret` header matching `ENV["FLUXO_SHARED_SECRET"]` (via `ActiveSupport::SecurityUtils.secure_compare`)
 2. `X-User-Email` header identifying the target user
@@ -163,7 +163,7 @@ Upstream `v0.6.8` targets Ruby `3.4.7`. This fork pins the runtime to `3.2.2` fo
 **Type:** Integration
 **Risk:** Low
 
-When running inside the Fluxo iframe (`embedded_mode?`), the main application layout now:
+When running inside the Ordi iframe (`embedded_mode?`), the main application layout now:
 - Hides the Sure logo (replaced with empty space) in both mobile and desktop nav
 - Hides the entire right sidebar (AI chat / "Enable AI Chats")
 - Hides the panel-right toggle button

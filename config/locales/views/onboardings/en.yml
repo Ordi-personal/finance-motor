@@ -55,16 +55,16 @@ en:
       reduce_stress: Reduce financial stress or anxiety
       submit: Next
     trial:
-      title: Try Sure for 45 days
+      title: "Try %{product_name} for 45 days"
       data_deletion: Data will be removed afterwards
       description_html: Starting today, you can thoroughly test the product.<br/>If you like it, self-host it or contribute to keep using it here.
-      try_button: Try Sure for 45 days
+      try_button: "Try %{product_name} for 45 days"
       continue_trial: Continue trial
       upgrade: Upgrade
       how_it_works: How it works
       today: Today
-      today_description: You get 45 days of free access to Sure.
+      today_description: "You get 45 days of free access to %{product_name}."
       in_40_days: In 40 days (%{date})
       in_40_days_description: We'll send you a reminder to export your data.
       in_45_days: In 45 days (%{date})
-      in_45_days_description: We'll delete your data — contribute to keep using Sure!
+      in_45_days_description: "We'll delete your data — contribute to keep using %{product_name}!"

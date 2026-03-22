@@ -1,4 +1,4 @@
-module FluxoIntegration
+module OrdiIntegration
   extend ActiveSupport::Concern
 
   included do

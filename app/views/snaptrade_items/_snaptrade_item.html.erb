@@ -1,11 +1,9 @@
 <%# locals: (snaptrade_item:) %>
-
 <%= tag.div id: dom_id(snaptrade_item) do %>
   <details open class="group bg-container p-4 shadow-border-xs rounded-xl">
     <summary class="flex items-center justify-between gap-2">
       <div class="flex items-center gap-2">
         <%= icon "chevron-right", class: "group-open:transform group-open:rotate-90" %>
-
         <div class="flex items-center justify-center h-8 w-8 bg-success/10 rounded-full">
           <% if snaptrade_item.logo.attached? %>
             <%= image_tag snaptrade_item.logo, class: "rounded-full h-full w-full", loading: "lazy" %>
@@ -15,9 +13,7 @@
             </div>
           <% end %>
         </div>
-
         <% unlinked_count = snaptrade_item.unlinked_accounts_count %>
-
         <div class="pl-1 text-sm">
           <div class="flex items-center gap-2">
             <%= tag.p snaptrade_item.name, class: "font-medium text-primary" %>
@@ -56,7 +52,6 @@
           <% end %>
         </div>
       </div>
-
       <div class="flex items-center gap-2">
         <% if snaptrade_item.requires_update? || !snaptrade_item.user_registered? %>
           <%= render DS::Link.new(
@@ -73,7 +68,6 @@
             disabled: snaptrade_item.syncing?
           ) %>
         <% end %>
-
         <%= render DS::Menu.new do |menu| %>
           <% menu.with_item(
             variant: "link",
@@ -107,13 +101,11 @@
         <% end %>
       </div>
     </summary>
-
     <% unless snaptrade_item.scheduled_for_deletion? %>
       <div class="space-y-4 mt-4">
         <% if snaptrade_item.accounts.any? %>
           <%= render "accounts/index/account_groups", accounts: snaptrade_item.accounts %>
         <% end %>
-
         <%# Sync summary (collapsible) - using shared ProviderSyncSummary component %>
         <% stats = snaptrade_item.syncs.ordered.first&.sync_stats || {} %>
         <% activities_pending = snaptrade_item.snaptrade_accounts.any?(&:activities_fetch_pending) %>
@@ -123,12 +115,11 @@
           institutions_count: snaptrade_item.snaptrade_accounts.map(&:brokerage_name).uniq.compact.size,
           activities_pending: activities_pending
         ) %>
-
         <% if unlinked_count > 0 && snaptrade_item.accounts.empty? %>
           <%# No accounts imported yet - show prominent setup prompt %>
           <div class="p-4 flex flex-col gap-3 items-center justify-center">
             <p class="text-primary font-medium text-sm"><%= t(".setup_needed") %></p>
-            <p class="text-secondary text-sm"><%= t(".setup_description") %></p>
+            <p class="text-secondary text-sm"><%= t(".setup_description", product_name: product_name) %></p>
             <%= render DS::Link.new(
               text: t(".setup_action"),
               icon: "settings",

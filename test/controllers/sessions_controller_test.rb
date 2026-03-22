@@ -667,7 +667,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
         email: @user.email,
         first_name: "Bob",
         last_name: "Dylan",
-        iss: "fluxo-app",
+        iss: "ordi-app",
         aud: "wrong-audience",
         jti: SecureRandom.uuid,
         exp: 5.minutes.from_now.to_i
@@ -687,12 +687,13 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   test "sso callback rejects replayed token" do
     secret = "test-sso-secret"
     jti = SecureRandom.uuid
+    cache_key = "sso:jti:#{jti}"
     token = JWT.encode(
       {
         email: @user.email,
         first_name: "Bob",
         last_name: "Dylan",
-        iss: "fluxo-app",
+        iss: "ordi-app",
         aud: "sure-sso",
         jti: jti,
         exp: 5.minutes.from_now.to_i
@@ -702,13 +703,14 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     )
 
     with_env_overrides("SSO_SECRET_KEY" => secret) do
-      Rails.cache.write("sso:jti:#{jti}", true, expires_in: 5.minutes)
+      Rails.cache.stubs(:exist?).with(cache_key).returns(true)
       get "/auth/sso", params: { token: token }
     end
 
     assert_redirected_to new_session_path
     assert_equal "Invalid SSO token", flash[:alert]
   ensure
-    Rails.cache.delete("sso:jti:#{jti}") if jti.present?
+    Rails.cache.unstub(:exist?)
+    Rails.cache.delete(cache_key) if defined?(cache_key) && cache_key.present?
   end
 end

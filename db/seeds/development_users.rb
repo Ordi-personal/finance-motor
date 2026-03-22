@@ -4,23 +4,23 @@ password = ENV.fetch("DEV_DEFAULT_PASSWORD", "Dev@12345")
 
 users = [
   {
-    email: "padre@fluxo.local",
+    email: "padre@ordime.local",
     first_name: "Padre",
-    last_name: "Fluxo",
-    family_name: "Paroquia Fluxo",
+    last_name: "Ordi",
+    family_name: "Paroquia Ordi",
     role: "admin"
   },
   {
-    email: "teste@fluxo.local",
+    email: "teste@ordime.local",
     first_name: "Teste",
     last_name: "Financeiro",
     family_name: "Familia Teste Sure",
     role: "admin"
   },
   {
-    email: "vagner@fluxo.ai",
+    email: "vagner@ordime.app",
     first_name: "Vagner",
-    last_name: "Fluxo",
+    last_name: "Ordi",
     family_name: "Familia Vagner",
     role: "admin"
   }

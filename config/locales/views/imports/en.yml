@@ -69,6 +69,12 @@ en:
         instructions_5: No commas, no currency symbols, and no parentheses in numbers.
         title: Import your data
   imports:
+    document_types:
+      bank_statement: Bank Statement
+      credit_card_statement: Credit Card Statement
+      investment_statement: Investment Statement
+      other: Other Document
+      unknown: Unknown Document
     empty:
       message: No imports yet.
       new: New Import

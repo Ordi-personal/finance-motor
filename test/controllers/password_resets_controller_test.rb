@@ -30,23 +30,24 @@ class PasswordResetsControllerTest < ActionDispatch::IntegrationTest
 
   test "all actions redirect when password features are disabled" do
     AuthConfig.stubs(:password_features_enabled?).returns(false)
+    expected_alert = I18n.t("password_resets.disabled", product_name: Rails.configuration.x.product_name)
 
     get new_password_reset_path
     assert_redirected_to new_session_path
-    assert_equal "Password reset via Sure is disabled. Please reset your password through your identity provider.", flash[:alert]
+    assert_equal expected_alert, flash[:alert]
 
     post password_reset_path, params: { email: @user.email }
     assert_redirected_to new_session_path
-    assert_equal "Password reset via Sure is disabled. Please reset your password through your identity provider.", flash[:alert]
+    assert_equal expected_alert, flash[:alert]
 
     get edit_password_reset_path(token: @user.generate_token_for(:password_reset))
     assert_redirected_to new_session_path
-    assert_equal "Password reset via Sure is disabled. Please reset your password through your identity provider.", flash[:alert]
+    assert_equal expected_alert, flash[:alert]
 
     patch password_reset_path(token: @user.generate_token_for(:password_reset)),
       params: { user: { password: "password", password_confirmation: "password" } }
     assert_redirected_to new_session_path
-    assert_equal "Password reset via Sure is disabled. Please reset your password through your identity provider.", flash[:alert]
+    assert_equal expected_alert, flash[:alert]
   end
 
   # Security: SSO-only users should not receive password reset emails
@@ -81,7 +82,7 @@ class PasswordResetsControllerTest < ActionDispatch::IntegrationTest
       params: { user: { password: "NewSecure1!", password_confirmation: "NewSecure1!" } }
 
     assert_redirected_to new_session_path
-    assert_equal "Your account uses SSO for authentication. Please contact your administrator to manage your credentials.", flash[:alert]
+    assert_equal I18n.t("password_resets.sso_only_user"), flash[:alert]
 
     # Verify password was not set
     sso_user.reload

@@ -21,7 +21,7 @@
 ### Modificações re-aplicadas neste upgrade
 | Arquivo | Modificação |
 |---------|-------------|
-| `config/initializers/content_security_policy.rb` | Re-ativado CSP com `frame_ancestors` para fluxome.app |
+| `config/initializers/content_security_policy.rb` | Re-ativado CSP com `frame_ancestors` para ordime.app e legado Fluxo |
 | `config/application.rb` | `config.i18n.default_locale = :'pt-BR'` |
 | `config/routes.rb` | Rota `/auth/sso` + `/api/v1/preferences` |
 | `app/controllers/concerns/fluxo_integration.rb` | Concern de embedded mode (restaurado) |

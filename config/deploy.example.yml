@@ -31,17 +31,21 @@ env:
     - DATABASE_URL
     - REDIS_URL
     - SECRET_KEY_BASE
-    - FLUXO_SHARED_SECRET
+    - ORDI_SHARED_SECRET
     - SSO_SECRET_KEY
     - SIDEKIQ_WEB_USERNAME
     - SIDEKIQ_WEB_PASSWORD
   clear:
     PORT: 4000
+    APP_DOMAIN: finance.seudominio.com
+    APP_URL: https://finance.seudominio.com
+    BRAND_NAME: "Nome da Marca"
     PRODUCT_NAME: "Nome do Produto"
     SELF_HOSTED: true
     ONBOARDING_STATE: closed
     ENABLE_FRAME_ANCESTORS: true
-    HTTP_ALLOWED_HOSTS: https://seudominio.com
+    HTTP_ALLOWED_HOSTS: https://finance.seudominio.com,https://finance.antigo-seudominio.com
+    FRAME_ANCESTORS_HOSTS: https://app.seudominio.com,https://admin.seudominio.com
     RAILS_SERVE_STATIC_FILES: true
     RAILS_ASSUME_SSL: true
 
