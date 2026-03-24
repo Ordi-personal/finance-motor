@@ -179,8 +179,17 @@ class Api::V1::BaseController < ApplicationController
       true
     end
 
+    ORDI_ALLOWED_PATHS = %w[
+      /api/v1/preferences
+      /api/v1/accounts
+      /api/v1/transactions
+      /api/v1/transfers
+      /api/v1/imports
+      /api/v1/insights
+    ].freeze
+
     def ordi_internal_request_allowed?
-      return true if request.path == "/api/v1/preferences"
+      return true if ORDI_ALLOWED_PATHS.any? { |prefix| request.path.start_with?(prefix) }
 
       Rails.logger.warn("Ordi internal auth rejected for path #{request.path}")
       false
