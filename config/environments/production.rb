@@ -105,7 +105,7 @@ Rails.application.configure do
   allowed_hosts = HostListParser.parse_hosts(ENV["HTTP_ALLOWED_HOSTS"], ENV["APP_DOMAIN"])
   if allowed_hosts.any?
     allowed_hosts.each { |host| config.hosts << host }
-    config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+    config.host_authorization = { exclude: ->(request) { request.path == "/up" || request.headers["X-Ordi-Secret"].present? } }
   end
 
   # set REDIS_URL for Sidekiq to use Redis
