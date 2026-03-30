@@ -314,7 +314,7 @@ class Account < ApplicationRecord
   # "Non-cash" = "Illiquid"
   # "Investment" = A mix of both, including brokerage cash (liquid) and holdings (illiquid)
   def balance_type
-    case accountable_type
+    case accountable_type.to_s.demodulize
     when "Depository", "CreditCard"
       :cash
     when "Property", "Vehicle", "OtherAsset", "Loan", "OtherLiability"

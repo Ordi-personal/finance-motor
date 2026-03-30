@@ -75,6 +75,20 @@ class BalanceSheetTest < ActiveSupport::TestCase
     assert_equal 3000 + 5000, liability_groups.find { |ag| ag.name == I18n.t("accounts.types.other_liability") }.total
   end
 
+  test "merges legacy namespaced accountable types into the canonical balance sheet group" do
+    legacy_account = create_account(balance: 1000, accountable: Depository.new)
+    create_account(balance: 2000, accountable: Depository.new)
+
+    legacy_account.update_column(:accountable_type, "Sure::Depository")
+
+    asset_groups = BalanceSheet.new(@family).assets.account_groups
+    cash_group = asset_groups.find { |ag| ag.name == I18n.t("accounts.types.depository") }
+
+    assert_not_nil cash_group
+    assert_equal 3000, cash_group.total
+    assert_equal 1, asset_groups.count { |ag| ag.name == I18n.t("accounts.types.depository") }
+  end
+
   private
     def create_account(attributes = {})
       account = @family.accounts.create! name: "Test", currency: "USD", **attributes

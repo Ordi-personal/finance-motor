@@ -274,6 +274,8 @@ class Api::V1::BaseController < ApplicationController
         "OAuth Token"
       when :api_key
         "API Key: #{@api_key.name}"
+      when :ordi_secret
+        "Ordi Secret"
       else
         "Unknown"
       end

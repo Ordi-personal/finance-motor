@@ -156,6 +156,19 @@ class AccountTest < ActiveSupport::TestCase
     assert_not @account.tax_advantaged?
   end
 
+  test "balance_type normalizes legacy namespaced accountable types" do
+    legacy_account = @family.accounts.create!(
+      name: "Legacy Cash",
+      balance: 250,
+      currency: "USD",
+      accountable: Depository.new
+    )
+
+    legacy_account.update_column(:accountable_type, "Sure::Depository")
+
+    assert_equal :cash, legacy_account.balance_type
+  end
+
   test "destroying account purges attached logo" do
     @account.logo.attach(
       io: StringIO.new("fake-logo-content"),
