@@ -9,7 +9,7 @@ jobs:
   update-docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v8
+      - uses: actions/github-script@v9
         env:
           MINTLIFY_API_KEY: ${{ secrets.MINTLIFY_API_KEY }}
           PROJECT_ID: ${{ secrets.MINTLIFY_PROJECT_ID }}
