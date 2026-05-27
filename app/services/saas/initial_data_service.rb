@@ -30,11 +30,10 @@ module Saas
     end
 
     def create_default_categories
-      # Ported logic from Category.default_categories but scoped to family
-      default_categories_data.each do |name, color, icon, classification|
+      # Ported logic from Category.default_categories but scoped to family.
+      default_categories_data.each do |name, color, icon|
         family.categories.find_or_create_by!(name: name) do |category|
           category.color = color
-          category.classification = classification
           category.lucide_icon = icon
         end
       end
@@ -74,28 +73,28 @@ module Saas
 
     def default_categories_data
       [
-        [ I18n.t("models.category.defaults.income", locale: :"pt-BR"), "#22c55e", "circle-dollar-sign", "income" ],
-        [ I18n.t("models.category.defaults.food_drink", locale: :"pt-BR"), "#f97316", "utensils", "expense" ],
-        [ I18n.t("models.category.defaults.groceries", locale: :"pt-BR"), "#407706", "shopping-bag", "expense" ],
-        [ I18n.t("models.category.defaults.shopping", locale: :"pt-BR"), "#3b82f6", "shopping-cart", "expense" ],
-        [ I18n.t("models.category.defaults.transportation", locale: :"pt-BR"), "#0ea5e9", "bus", "expense" ],
-        [ I18n.t("models.category.defaults.travel", locale: :"pt-BR"), "#2563eb", "plane", "expense" ],
-        [ I18n.t("models.category.defaults.entertainment", locale: :"pt-BR"), "#a855f7", "drama", "expense" ],
-        [ I18n.t("models.category.defaults.healthcare", locale: :"pt-BR"), "#4da568", "pill", "expense" ],
-        [ I18n.t("models.category.defaults.personal_care", locale: :"pt-BR"), "#14b8a6", "scissors", "expense" ],
-        [ I18n.t("models.category.defaults.home_improvement", locale: :"pt-BR"), "#d97706", "hammer", "expense" ],
-        [ I18n.t("models.category.defaults.mortgage_rent", locale: :"pt-BR"), "#b45309", "home", "expense" ],
-        [ I18n.t("models.category.defaults.utilities", locale: :"pt-BR"), "#eab308", "lightbulb", "expense" ],
-        [ I18n.t("models.category.defaults.subscriptions", locale: :"pt-BR"), "#6366f1", "wifi", "expense" ],
-        [ I18n.t("models.category.defaults.insurance", locale: :"pt-BR"), "#0284c7", "shield", "expense" ],
-        [ I18n.t("models.category.defaults.sports_fitness", locale: :"pt-BR"), "#10b981", "dumbbell", "expense" ],
-        [ I18n.t("models.category.defaults.gifts_donations", locale: :"pt-BR"), "#61c9ea", "hand-helping", "expense" ],
-        [ I18n.t("models.category.defaults.taxes", locale: :"pt-BR"), "#dc2626", "landmark", "expense" ],
-        [ I18n.t("models.category.defaults.loan_payments", locale: :"pt-BR"), "#e11d48", "credit-card", "expense" ],
-        [ I18n.t("models.category.defaults.services", locale: :"pt-BR"), "#7c3aed", "briefcase", "expense" ],
-        [ I18n.t("models.category.defaults.fees", locale: :"pt-BR"), "#6b7280", "receipt", "expense" ],
-        [ I18n.t("models.category.defaults.savings_investments", locale: :"pt-BR"), "#059669", "piggy-bank", "expense" ],
-        [ I18n.t("models.category.defaults.investment_contributions", locale: :"pt-BR"), "#0d9488", "trending-up", "expense" ]
+        [ I18n.t("models.category.defaults.income", locale: :"pt-BR"), "#22c55e", "circle-dollar-sign" ],
+        [ I18n.t("models.category.defaults.food_and_drink", locale: :"pt-BR"), "#f97316", "utensils" ],
+        [ I18n.t("models.category.defaults.groceries", locale: :"pt-BR"), "#407706", "shopping-bag" ],
+        [ I18n.t("models.category.defaults.shopping", locale: :"pt-BR"), "#3b82f6", "shopping-cart" ],
+        [ I18n.t("models.category.defaults.transportation", locale: :"pt-BR"), "#0ea5e9", "bus" ],
+        [ I18n.t("models.category.defaults.travel", locale: :"pt-BR"), "#2563eb", "plane" ],
+        [ I18n.t("models.category.defaults.entertainment", locale: :"pt-BR"), "#a855f7", "drama" ],
+        [ I18n.t("models.category.defaults.healthcare", locale: :"pt-BR"), "#4da568", "pill" ],
+        [ I18n.t("models.category.defaults.personal_care", locale: :"pt-BR"), "#14b8a6", "scissors" ],
+        [ I18n.t("models.category.defaults.home_improvement", locale: :"pt-BR"), "#d97706", "hammer" ],
+        [ I18n.t("models.category.defaults.mortgage_rent", locale: :"pt-BR"), "#b45309", "home" ],
+        [ I18n.t("models.category.defaults.utilities", locale: :"pt-BR"), "#eab308", "lightbulb" ],
+        [ I18n.t("models.category.defaults.subscriptions", locale: :"pt-BR"), "#6366f1", "wifi" ],
+        [ I18n.t("models.category.defaults.insurance", locale: :"pt-BR"), "#0284c7", "shield" ],
+        [ I18n.t("models.category.defaults.sports_and_fitness", locale: :"pt-BR"), "#10b981", "dumbbell" ],
+        [ I18n.t("models.category.defaults.gifts_and_donations", locale: :"pt-BR"), "#61c9ea", "hand-helping" ],
+        [ I18n.t("models.category.defaults.taxes", locale: :"pt-BR"), "#dc2626", "landmark" ],
+        [ I18n.t("models.category.defaults.loan_payments", locale: :"pt-BR"), "#e11d48", "credit-card" ],
+        [ I18n.t("models.category.defaults.services", locale: :"pt-BR"), "#7c3aed", "briefcase" ],
+        [ I18n.t("models.category.defaults.fees", locale: :"pt-BR"), "#6b7280", "receipt" ],
+        [ I18n.t("models.category.defaults.savings_and_investments", locale: :"pt-BR"), "#059669", "piggy-bank" ],
+        [ I18n.t("models.category.defaults.investment_contributions", locale: :"pt-BR"), "#0d9488", "trending-up" ]
       ]
     end
 
@@ -107,9 +106,9 @@ module Saas
         [ "Uber/99", ["Uber", "99Pop", "99*Pop", "Uber *Trip"], cat.call("transportation") ],
         [ "Posto Gasolina", ["Posto", "Ipiranga", "Shell", "Petrobras"], cat.call("transportation") ],
         [ "Pedágio", ["Sem Parar", "Conectcar", "Auto Expresso"], cat.call("transportation") ],
-        [ "Delivery", ["iFood", "Rappi", "Uber Eats", "Zé Delivery"], cat.call("food_drink") ],
+        [ "Delivery", ["iFood", "Rappi", "Uber Eats", "Zé Delivery"], cat.call("food_and_drink") ],
         [ "Mercado", ["Carrefour", "Pao de Acucar", "Assai", "Atacadao", "Extra", "Supermercado"], cat.call("groceries") ],
-        [ "Padaria", ["Padaria", "Panificadora"], cat.call("food_drink") ],
+        [ "Padaria", ["Padaria", "Panificadora"], cat.call("food_and_drink") ],
         [ "Streaming", ["Netflix", "Spotify", "Amazon Prime", "Disney+", "HBO", "Apple.com/bill"], cat.call("subscriptions") ],
         [ "Cloud/Tech", ["AWS", "Amazon Web Services", "Heroku", "DigitalOcean", "Google Cloud"], cat.call("services") ],
         [ "Internet/TV", ["Claro", "Vivo", "Tim", "Oi", "Net Servicos"], cat.call("utilities") ],

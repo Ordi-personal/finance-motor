@@ -5,33 +5,27 @@
 # https://guides.rubyonrails.org/security.html#content-security-policy-header
 
 Rails.application.configure do
-  config.content_security_policy do |policy|
-    policy.default_src :self, :https
-    policy.font_src    :self, :https, :data
-    policy.img_src     :self, :https, :data, :blob
-    policy.object_src  :none
-    policy.script_src  :self, :https, :unsafe_inline, :unsafe_eval
-    policy.style_src   :self, :https, :unsafe_inline
-    policy.connect_src :self, :https, :wss
+	config.content_security_policy do |policy|
+		policy.default_src :self, :https
+		policy.font_src    :self, :https, :data
+		policy.img_src     :self, :https, :data, :blob
+		policy.object_src  :none
+		policy.script_src  :self, :https, :unsafe_inline, :unsafe_eval
+		policy.style_src   :self, :https, :unsafe_inline
+		policy.connect_src :self, :https, :wss
 
-    # Allow iframe embedding from configured origins.
-    # In production, FRAME_ANCESTORS_HOSTS overrides the defaults.
-    frame_hosts = ENV["FRAME_ANCESTORS_HOSTS"]&.split(",")&.map(&:strip)
-    if frame_hosts.present?
-      policy.frame_ancestors :self, *frame_hosts
-    else
-      # Development fallback — localhost allowed for local dev only
-      policy.frame_ancestors :self, "http://localhost:3000"
-    end
+		frame_hosts = ENV["FRAME_ANCESTORS_HOSTS"]&.split(",")&.map(&:strip)
+		if frame_hosts.present?
+			policy.frame_ancestors :self, *frame_hosts
+		else
+			policy.frame_ancestors :self, "http://localhost:3000"
+		end
 
-    # Specify URI for violation reports
-    # policy.report_uri "/csp-violation-report-endpoint"
-  end
+		# policy.report_uri "/csp-violation-report-endpoint"
+	end
 
-  # Generate session nonces for permitted importmap, inline scripts, and inline styles.
-  # config.content_security_policy_nonce_generator = ->(request) { request.session.id.to_s }
-  # config.content_security_policy_nonce_directives = %w(script-src style-src)
+	# config.content_security_policy_nonce_generator = ->(request) { request.session.id.to_s }
+	# config.content_security_policy_nonce_directives = %w(script-src style-src)
 
-  # Report violations without enforcing the policy.
-  # config.content_security_policy_report_only = true
+	# config.content_security_policy_report_only = true
 end

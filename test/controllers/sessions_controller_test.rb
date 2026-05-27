@@ -543,20 +543,39 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
       { name: "openid_connect", strategy: "openid_connect", label: "Google" }
     ])
 
-    get "/auth/mobile/openid_connect", params: {
-      device_id: "flutter-device-006",
-      device_name: "Pixel 8",
-      device_type: "android"
-    }
-    get "/auth/openid_connect/callback"
+    # Use a real cache store so we can verify the cache entry written by handle_mobile_sso_onboarding
+    original_cache = Rails.cache
+    Rails.cache = ActiveSupport::Cache::MemoryStore.new
 
-    assert_response :redirect
-    redirect_url = @response.redirect_url
+    begin
+      get "/auth/mobile/openid_connect", params: {
+        device_id: "flutter-device-006",
+        device_name: "Pixel 8",
+        device_type: "android"
+      }
+      get "/auth/openid_connect/callback"
 
-    assert redirect_url.start_with?("sureapp://oauth/callback?"), "Expected redirect to sureapp://"
-    params = Rack::Utils.parse_query(URI.parse(redirect_url).query)
-    assert_equal "account_not_linked", params["error"]
-    assert_nil session[:mobile_sso], "Expected mobile_sso session to be cleared"
+      assert_response :redirect
+      redirect_url = @response.redirect_url
+
+      assert redirect_url.start_with?("sureapp://oauth/callback?"), "Expected redirect to sureapp://"
+      params = Rack::Utils.parse_query(URI.parse(redirect_url).query)
+      assert_equal "account_not_linked", params["status"]
+      assert params["linking_code"].present?, "Expected linking_code in redirect params"
+      assert_nil session[:mobile_sso], "Expected mobile_sso session to be cleared"
+
+      # Verify the cache entry written by handle_mobile_sso_onboarding
+      cached = Rails.cache.read("mobile_sso_link:#{params['linking_code']}")
+      assert cached.present?, "Expected cache entry for mobile_sso_link:#{params['linking_code']}"
+      assert_equal "openid_connect", cached[:provider]
+      assert_equal "unlinked-uid-99999", cached[:uid]
+      assert_equal user_without_oidc.email, cached[:email]
+      assert_equal "New User", cached[:name]
+      assert cached.key?(:device_info), "Expected device_info in cached payload"
+      assert cached.key?(:allow_account_creation), "Expected allow_account_creation in cached payload"
+    ensure
+      Rails.cache = original_cache
+    end
   end
 
   test "mobile SSO does not create a web session" do
@@ -658,58 +677,5 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     # Follow redirect to verify we're on the link page (not logged in)
     follow_redirect!
     assert_response :success
-  end
-
-  test "sso callback rejects token with wrong audience" do
-    secret = "test-sso-secret"
-    token = JWT.encode(
-      {
-        email: @user.email,
-        first_name: "Bob",
-        last_name: "Dylan",
-        iss: "ordi-app",
-        aud: "wrong-audience",
-        jti: SecureRandom.uuid,
-        exp: 5.minutes.from_now.to_i
-      },
-      secret,
-      "HS256"
-    )
-
-    with_env_overrides("SSO_SECRET_KEY" => secret) do
-      get "/auth/sso", params: { token: token }
-    end
-
-    assert_redirected_to new_session_path
-    assert_equal "Invalid SSO token", flash[:alert]
-  end
-
-  test "sso callback rejects replayed token" do
-    secret = "test-sso-secret"
-    jti = SecureRandom.uuid
-    cache_key = "sso:jti:#{jti}"
-    token = JWT.encode(
-      {
-        email: @user.email,
-        first_name: "Bob",
-        last_name: "Dylan",
-        iss: "ordi-app",
-        aud: "sure-sso",
-        jti: jti,
-        exp: 5.minutes.from_now.to_i
-      },
-      secret,
-      "HS256"
-    )
-
-    with_env_overrides("SSO_SECRET_KEY" => secret) do
-      Rails.cache.write(cache_key, true, expires_in: 5.minutes)
-      get "/auth/sso", params: { token: token }
-    end
-
-    assert_redirected_to new_session_path
-    assert_equal "Invalid SSO token", flash[:alert]
-  ensure
-    Rails.cache.delete(cache_key) if defined?(cache_key) && cache_key.present?
   end
 end

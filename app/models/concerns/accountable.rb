@@ -6,22 +6,9 @@ module Accountable
   # Define empty hash to ensure all accountables have this defined
   SUBTYPES = {}.freeze
 
-  def self.canonical_type(type)
-    type.to_s.demodulize.presence
-  end
-
-  def self.storage_type_names(type)
-    canonical = canonical_type(type)
-    return [] if canonical.blank?
-
-    [ canonical, "Sure::#{canonical}" ].uniq
-  end
-
   def self.from_type(type)
-    canonical = canonical_type(type)
-    return nil unless TYPES.include?(canonical)
-
-    canonical.constantize
+    return nil unless TYPES.include?(type)
+    type.constantize
   end
 
   included do
@@ -71,14 +58,35 @@ module Accountable
       classification == "asset" ? "up" : "down"
     end
 
+    def singular_display_name
+      I18n.t("accounts.types.#{name.underscore}", default: legacy_singular_display_name)
+    end
+
     def display_name
-      self.name.pluralize.titleize
+      I18n.t("accounts.types_plural.#{name.underscore}", default: legacy_display_name)
+    end
+
+    def legacy_display_name
+      return singular_display_name if name.in?([ "Depository", "Crypto" ])
+
+      singular_display_name.pluralize
+    end
+
+    def legacy_singular_display_name
+      case name
+      when "Depository"
+        "Cash"
+      when "Crypto"
+        "Crypto"
+      else
+        name.underscore.humanize
+      end
     end
 
     # Sums the balances of all active accounts of this type, converting foreign currencies to the family's currency.
     # @return [BigDecimal] total balance in the family's currency
     def balance_money(family)
-      accounts = family.accounts.active.where(accountable_type: Accountable.storage_type_names(self.name)).to_a
+      accounts = family.accounts.active.where(accountable_type: self.name).to_a
 
       foreign_currencies = accounts.filter_map { |a| a.currency if a.currency != family.currency }
       rates = ExchangeRate.rates_for(foreign_currencies, to: family.currency, date: Date.current)
@@ -91,6 +99,10 @@ module Accountable
         end
       }
     end
+  end
+
+  def singular_display_name
+    self.class.singular_display_name
   end
 
   def display_name

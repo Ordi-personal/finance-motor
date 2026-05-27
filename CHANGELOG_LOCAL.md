@@ -2,45 +2,48 @@
 
 ---
 
-## 📅 2026-03-07 - Atualização para Sure v0.6.8
+## 📅 2026-05-25 - Atualização para Sure v0.7.1-alpha.11
 
 ### Base atualizada
-- **De:** maybe-finance/maybe @ d5dc36a (Mai 2024)
-- **Para:** we-promise/sure @ v0.6.8 (28 Fev 2026)
+- **De:** we-promise/sure @ v0.6.8 (07 Mar 2026)
+- **Para:** we-promise/sure @ v0.7.1-alpha.11 (Mai 2026)
 
-### O que o Sure v0.6.8 traz (sem ação nossa)
+### O que o Sure v0.7.1-alpha.11 traz (sem ação nossa)
 - Novos providers: SnapTrade, Mercury, Coinbase, Indexa Capital
 - Remove Flipper (feature flags agora via ENV + `config/auth.yml`)
 - Adiciona CORS (`rack-cors`) para clientes mobile (Flutter)
 - Suporte a Redis Sentinel
 - SSO multi-provider com SAML, JIT melhorado
 - MCP server endpoint para assistentes AI externos
-- Muitas migrations novas (Jan/Fev 2026)
-- Ruby 3.4.7 no upstream (nós mantemos 3.2.2 por ora)
+- Muitas migrations novas e novas telas/configs de providers
+- Ruby 3.4.7 no upstream (nós mantemos 3.4.2 por ora)
 
 ### Modificações re-aplicadas neste upgrade
 | Arquivo | Modificação |
 |---------|-------------|
-| `config/initializers/content_security_policy.rb` | Re-ativado CSP com `frame_ancestors` para ordime.app e legado Fluxo |
+| `config/initializers/content_security_policy.rb` | Re-ativado CSP com `frame_ancestors` via `FRAME_ANCESTORS_HOSTS` |
 | `config/application.rb` | `config.i18n.default_locale = :'pt-BR'` |
 | `config/routes.rb` | Rota `/auth/sso` + `/api/v1/preferences` |
-| `app/controllers/concerns/fluxo_integration.rb` | Concern de embedded mode (restaurado) |
-| `app/controllers/application_controller.rb` | `include FluxoIntegration` |
+| `app/controllers/concerns/ordi_integration.rb` | Concern de embedded mode (restaurado) |
+| `app/controllers/application_controller.rb` | `include OrdiIntegration` |
 | `app/controllers/auth/sso_controller.rb` | Endpoint SSO JWT (restaurado) |
-| `app/controllers/api/v1/base_controller.rb` | `authenticate_fluxo_secret` (X-Fluxo-Secret header) |
+| `app/controllers/api/v1/base_controller.rb` | `authenticate_ordi_secret` (`X-Ordi-Secret` + allowlist de rotas) |
 | `app/controllers/api/v1/preferences_controller.rb` | GET/PATCH de preferências (restaurado) |
 | `app/helpers/languages_helper.rb` | `timezone_options(current_timezone)` + `timezone_label_for` |
 | `app/views/settings/preferences/show.html.erb` | Passa timezone atual ao `timezone_options` |
 | `app/services/saas/initial_data_service.rb` | Provisioning atômico de Rules (restaurado) |
+| `config/environments/production.rb` | `HostListParser` para hosts/mailer + bypass de host auth para `X-Ordi-Secret` |
 | `config/locales/` (pt-BR) | Traduções restauradas + novas (budgets, chats, components, etc.) |
-| `.ruby-version` | Mantido em 3.2.2 (upstream usa 3.4.7) |
-| `Dockerfile` | `ARG RUBY_VERSION=3.2.2` |
+| `config/credentials.yml.enc` | Restaurado do backup local para manter compatibilidade com `master.key` existente |
+| `.ruby-version` | Mantido em 3.4.2 (upstream usa 3.4.7) |
+| `Dockerfile` | `ARG RUBY_VERSION=3.4.2` |
 | `config/deploy.yml` | Configuração de deploy Kamal (restaurado) |
 
 ### Pendências pós-upgrade
-- [ ] Ruby 3.2.2 → 3.4.7: upgrade necessário em janela separada (testar gems, Dockerfile)
+- [ ] Ruby 3.4.2 → 3.4.7: upgrade necessário em janela separada (testar gems, Dockerfile)
 - [ ] Traduzir providers novos (coinbase, mercury, snaptrade, indexa, pdf_import_mailer) quando/se forem usados
 - [ ] Executar migrations em staging antes de produção
+- [ ] Validar boot completo do app e testes no ambiente com banco/serviços do `finance-motor`
 - [ ] Testar fluxo SSO end-to-end após deploy
 
 Este arquivo documenta todas as modificações feitas ao código-fonte do Finance Motor (fork do Maybe Finance) para facilitar futuras atualizações e evitar conflitos de merge.

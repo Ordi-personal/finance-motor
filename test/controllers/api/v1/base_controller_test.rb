@@ -60,6 +60,23 @@ class Api::V1::BaseControllerTest < ActionDispatch::IntegrationTest
     assert_equal @user.email, response_body["user"]
   end
 
+  test "should reject revoked access token" do
+    access_token = Doorkeeper::AccessToken.create!(
+      application: @oauth_app,
+      resource_owner_id: @user.id,
+      scopes: "read"
+    )
+    access_token.revoke
+
+    get "/api/v1/test", params: {}, headers: {
+      "Authorization" => "Bearer #{access_token.token}"
+    }
+
+    assert_response :unauthorized
+    response_body = JSON.parse(response.body)
+    assert_equal "unauthorized", response_body["error"]
+  end
+
   test "should reject invalid access token" do
     get "/api/v1/test", params: {}, headers: {
       "Authorization" => "Bearer invalid_token"
@@ -79,6 +96,50 @@ class Api::V1::BaseControllerTest < ActionDispatch::IntegrationTest
     response_body = JSON.parse(response.body)
     assert_equal "test_success", response_body["message"]
     assert_equal @user.email, response_body["user"]
+  end
+
+  test "should authenticate with valid Ordi secret on allowed read path" do
+    with_env_overrides("ORDI_SHARED_SECRET" => "shared-secret") do
+      get "/api/v1/preferences", headers: {
+        "X-Ordi-Secret" => "shared-secret",
+        "X-User-Email" => @user.email
+      }
+
+      assert_response :success
+      response_body = JSON.parse(response.body)
+      assert_equal @user.family.locale, response_body["locale"]
+      assert_equal @user.family.currency, response_body["currency"]
+      assert_equal @user.family.timezone, response_body["timezone"]
+    end
+  end
+
+  test "should authenticate with valid Ordi secret on allowed write path" do
+    with_env_overrides("ORDI_SHARED_SECRET" => "shared-secret") do
+      patch "/api/v1/preferences", params: { timezone: "America/Sao_Paulo" }, headers: {
+        "X-Ordi-Secret" => "shared-secret",
+        "X-User-Email" => @user.email
+      }
+
+      assert_response :success
+      assert_equal "America/Sao_Paulo", @user.family.reload.timezone
+
+      response_body = JSON.parse(response.body)
+      assert_equal "ok", response_body["status"]
+      assert_equal "America/Sao_Paulo", response_body["timezone"]
+    end
+  end
+
+  test "should reject Ordi secret on disallowed path" do
+    with_env_overrides("ORDI_SHARED_SECRET" => "shared-secret") do
+      get "/api/v1/test", headers: {
+        "X-Ordi-Secret" => "shared-secret",
+        "X-User-Email" => @user.email
+      }
+
+      assert_response :unauthorized
+      response_body = JSON.parse(response.body)
+      assert_equal "unauthorized", response_body["error"]
+    end
   end
 
   test "should reject invalid API key" do
@@ -396,17 +457,6 @@ class Api::V1::BaseControllerTest < ActionDispatch::IntegrationTest
     assert response_body["details"]["limit"] == 100
     assert response_body["details"]["current"] >= 100
     assert response_body["details"]["reset_in_seconds"] > 0
-  end
-
-  test "should reject ordi secret auth for non-allowlisted paths" do
-    with_env_overrides("ORDI_SHARED_SECRET" => "shared-secret") do
-      get "/api/v1/test", headers: {
-        "X-Ordi-Secret" => "shared-secret",
-        "X-User-Email" => @user.email
-      }
-    end
-
-    assert_response :unauthorized
   end
 
   test "rate limiting should be per API key" do

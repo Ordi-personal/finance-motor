@@ -19,7 +19,7 @@
       <p class="text-secondary text-sm"><%= t("onboardings.goals.subtitle", product_name: product_name) %></p>
     </div>
 
-    <%= styled_form_with model: @user, data: { turbo: false } do |form| %>
+    <%= form_with model: @user do |form| %>
       <%= form.hidden_field :redirect_to, value: self_hosted? ? "home" : "trial" %>
       <%= form.hidden_field :set_onboarding_goals_at, value: Time.current %>
       <%= form.hidden_field :onboarded_at, value: Time.current %>
@@ -46,6 +46,7 @@
       <div class="mt-6">
         <%= render DS::Button.new(
           text: t("onboardings.goals.submit"),
+          type: :submit,
           full_width: true
         ) %>
       </div>

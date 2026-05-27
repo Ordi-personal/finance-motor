@@ -152,8 +152,7 @@ class Transaction::SearchTest < ActiveSupport::TestCase
     # Create a travel category for testing
     travel_category = @family.categories.create!(
       name: "Travel",
-      color: "#3b82f6",
-      classification: "expense"
+      color: "#3b82f6"
     )
 
     # Create transactions with different categories
@@ -625,5 +624,26 @@ class Transaction::SearchTest < ActiveSupport::TestCase
           "Locale '#{locale}' should return #{expected_count} transactions when filtering with English 'Uncategorized' parameter, but got #{result_count}"
       end
     end
+  end
+
+  test "empty accessible_account_ids yields no visible transactions" do
+    create_transaction(account: @checking_account, amount: 100)
+
+    search = Transaction::Search.new(@family, filters: {}, accessible_account_ids: [])
+
+    assert_empty search.transactions_scope
+  end
+
+  test "totals handles empty accessible_account_ids without raising" do
+    create_transaction(account: @checking_account, amount: 100)
+
+    search = Transaction::Search.new(@family, filters: {}, accessible_account_ids: [])
+    totals = search.totals
+
+    assert_equal 0, totals.count
+    assert_equal Money.new(0, @family.currency), totals.expense_money
+    assert_equal Money.new(0, @family.currency), totals.income_money
+    assert_equal Money.new(0, @family.currency), totals.transfer_inflow_money
+    assert_equal Money.new(0, @family.currency), totals.transfer_outflow_money
   end
 end

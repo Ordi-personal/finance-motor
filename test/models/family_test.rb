@@ -18,7 +18,6 @@ class FamilyTest < ActiveSupport::TestCase
     assert category.persisted?
     assert_equal Category.investment_contributions_name, category.name
     assert_equal "#0d9488", category.color
-    assert_equal "expense", category.classification
     assert_equal "trending-up", category.lucide_icon
   end
 
@@ -26,7 +25,6 @@ class FamilyTest < ActiveSupport::TestCase
     family = families(:dylan_family)
     existing = family.categories.find_or_create_by!(name: Category.investment_contributions_name) do |c|
       c.color = "#0d9488"
-      c.classification = "expense"
       c.lucide_icon = "trending-up"
     end
 
@@ -89,7 +87,6 @@ class FamilyTest < ActiveSupport::TestCase
     legacy_category = family.categories.create!(
       name: "Investment Contributions",
       color: "#0d9488",
-      classification: "expense",
       lucide_icon: "trending-up"
     )
 
@@ -110,14 +107,12 @@ class FamilyTest < ActiveSupport::TestCase
     english_category = family.categories.create!(
       name: "Investment Contributions",
       color: "#0d9488",
-      classification: "expense",
       lucide_icon: "trending-up"
     )
 
     french_category = family.categories.create!(
       name: "Contributions aux investissements",
       color: "#0d9488",
-      classification: "expense",
       lucide_icon: "trending-up"
     )
 
@@ -176,6 +171,39 @@ class FamilyTest < ActiveSupport::TestCase
     new_merchant = family.merchants.create!(name: "New Test Merchant")
 
     assert_includes family.available_merchants, new_merchant
+  end
+
+  test "enabled currencies always include the base currency" do
+    family = families(:dylan_family)
+    family.update!(currency: "SGD", enabled_currencies: [ "USD" ])
+
+    family.update!(enabled_currencies: [ "USD" ])
+
+    assert_equal [ "SGD", "USD" ], family.reload.enabled_currency_codes
+  end
+
+  test "empty enabled currencies keeps all currencies available" do
+    family = families(:dylan_family)
+    family.update!(enabled_currencies: [])
+
+    assert_nil family.reload.enabled_currencies
+    assert_equal Money::Currency.as_options.map(&:iso_code), family.reload.enabled_currency_codes
+  end
+
+  test "enabled currencies are normalized and deduplicated" do
+    family = families(:dylan_family)
+    family.update!(currency: "SGD", enabled_currencies: [ "USD", "usd", "SGD" ])
+
+    assert_equal [ "SGD", "USD" ], family.reload.enabled_currencies
+    assert_equal [ "SGD", "USD" ], family.reload.enabled_currency_codes
+  end
+
+  test "all selected currencies collapse to default behavior" do
+    family = families(:dylan_family)
+    family.update!(enabled_currencies: Money::Currency.as_options.map(&:iso_code))
+
+    assert_nil family.reload.enabled_currencies
+    assert_equal Money::Currency.as_options.map(&:iso_code), family.reload.enabled_currency_codes
   end
 
   test "upload_document stores provided metadata on family document" do

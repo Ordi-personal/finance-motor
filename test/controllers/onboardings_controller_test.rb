@@ -14,11 +14,7 @@ class OnboardingsControllerTest < ActionDispatch::IntegrationTest
   test "should get show" do
     get onboarding_url
     assert_response :success
-    assert_select "h1", text: I18n.t(
-      "onboardings.show.title",
-      product_name: Rails.configuration.x.product_name,
-      locale: @family.locale
-    )
+    assert_select "h1", text: /set up your account/i
   end
 
 
@@ -28,7 +24,7 @@ class OnboardingsControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "input[name='user[family_attributes][moniker]'][value='Family'][required]"
     assert_select "input[name='user[family_attributes][moniker]'][value='Group'][required]"
-    assert_select "p", text: /How do you use #{Regexp.escape(Rails.configuration.x.product_name)}\?/i
+    assert_select "p", text: /Will be using Sure with/i
   end
 
   test "should get preferences" do

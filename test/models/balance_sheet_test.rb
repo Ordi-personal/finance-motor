@@ -56,9 +56,9 @@ class BalanceSheetTest < ActiveSupport::TestCase
     asset_groups = BalanceSheet.new(@family).assets.account_groups
 
     assert_equal 3, asset_groups.size
-    assert_equal 1000 + 2000, asset_groups.find { |ag| ag.name == I18n.t("accounts.types.depository") }.total
-    assert_equal 3000, asset_groups.find { |ag| ag.name == I18n.t("accounts.types.investment") }.total
-    assert_equal 5000, asset_groups.find { |ag| ag.name == I18n.t("accounts.types.other_asset") }.total
+    assert_equal 1000 + 2000, asset_groups.find { |ag| ag.name == Depository.display_name }.total
+    assert_equal 3000, asset_groups.find { |ag| ag.name == Investment.display_name }.total
+    assert_equal 5000, asset_groups.find { |ag| ag.name == OtherAsset.display_name }.total
   end
 
   test "calculates liability group totals" do
@@ -71,22 +71,8 @@ class BalanceSheetTest < ActiveSupport::TestCase
     liability_groups = BalanceSheet.new(@family).liabilities.account_groups
 
     assert_equal 2, liability_groups.size
-    assert_equal 1000 + 2000, liability_groups.find { |ag| ag.name == I18n.t("accounts.types.credit_card") }.total
-    assert_equal 3000 + 5000, liability_groups.find { |ag| ag.name == I18n.t("accounts.types.other_liability") }.total
-  end
-
-  test "merges legacy namespaced accountable types into the canonical balance sheet group" do
-    legacy_account = create_account(balance: 1000, accountable: Depository.new)
-    create_account(balance: 2000, accountable: Depository.new)
-
-    legacy_account.update_column(:accountable_type, "Sure::Depository")
-
-    asset_groups = BalanceSheet.new(@family).assets.account_groups
-    cash_group = asset_groups.find { |ag| ag.name == I18n.t("accounts.types.depository") }
-
-    assert_not_nil cash_group
-    assert_equal 3000, cash_group.total
-    assert_equal 1, asset_groups.count { |ag| ag.name == I18n.t("accounts.types.depository") }
+    assert_equal 1000 + 2000, liability_groups.find { |ag| ag.name == CreditCard.display_name }.total
+    assert_equal 3000 + 5000, liability_groups.find { |ag| ag.name == OtherLiability.display_name }.total
   end
 
   private

@@ -34,13 +34,13 @@ zh-TW:
         rows_label: 資料列
         unassigned_account: 需要為未分配的資料列建立新帳戶嗎？
       show:
-        account_mapping_description: 將匯入檔案中的帳戶對應到 Maybe 現有的帳戶。您也可以新增帳戶，或暫時不進行分類。
+        account_mapping_description: 將匯入檔案中的帳戶對應到 %{product_name} 現有的帳戶。您也可以新增帳戶，或暫時不進行分類。
         account_mapping_title: 分配您的帳戶
-        account_type_mapping_description: 將匯入檔案中的帳戶類型對應到 Maybe 的帳戶類型
+        account_type_mapping_description: 將匯入檔案中的帳戶類型對應到 %{product_name} 的帳戶類型
         account_type_mapping_title: 分配您的帳戶類型
-        category_mapping_description: 將匯入檔案中的類別對應到 Maybe 現有的類別。您也可以新增類別，或暫時不進行分類。
+        category_mapping_description: 將匯入檔案中的類別對應到 %{product_name} 現有的類別。您也可以新增類別，或暫時不進行分類。
         category_mapping_title: 分配您的類別
-        tag_mapping_description: 將匯入檔案中的標籤對應到 Maybe 現有的標籤。您也可以新增標籤，或暫時不進行分類。
+        tag_mapping_description: 將匯入檔案中的標籤對應到 %{product_name} 現有的標籤。您也可以新增標籤，或暫時不進行分類。
         tag_mapping_title: 分配您的標籤
     uploads:
       show:
@@ -52,26 +52,30 @@ zh-TW:
         instructions_5: 數字中請勿包含逗號、貨幣符號或括號。
         title: 匯入您的資料
   imports:
-    empty:
-      message: 尚無匯入紀錄。
-      new: 新增匯入
-    import:
-      complete: 已完成
-      delete: 刪除
-      failed: 失敗
-      in_progress: 處理中
-      label: "%{type}：%{datetime}"
-      revert_failed: 還原失敗
-      reverting: 還原中
-      uploading: 正在處理資料列
-      view: 查看
     index:
-      imports: 匯入紀錄
+      title: 匯入紀錄
       new: 新增匯入
-      title: 匯入/匯出
-      exports: 匯出紀錄
-      new_export: 新增匯出
-      no_exports: 尚無匯出紀錄。
+    table:
+      title: 匯入紀錄
+      header:
+        date: 日期
+        operation: 操作
+        status: 狀態
+        actions: 行動
+      row:
+        status:
+          in_progress: 處理中
+          uploading: 正在處理資料列
+          reverting: 還原中
+          revert_failed: 還原失敗
+          complete: 已完成
+          failed: 失敗
+        actions:
+          revert: 恢復
+          confirm_revert: 這將刪除已匯入的交易記錄，但您仍然可以隨時查看和重新匯入您的資料。
+          delete: 刪除
+          view: 查看
+      empty: 尚無匯入紀錄。
     new:
       description: 您可以透過 CSV 手動匯入各種類型的資料，或使用我們提供的匯入範本（如 Mint）。
       import_accounts: 匯入帳戶
@@ -86,3 +90,8 @@ zh-TW:
     ready:
       description: 以下是發佈此匯入後，將新增至您帳戶的項目摘要。
       title: 確認您的匯入資料
+      summary_item_label: 項目
+      summary_count_label: 數量
+      empty_summary: 在此檔案中找不到可匯入的記錄。檔案可能是空的，或各行不符合預期的匯出格式（每行應為包含「type」與「data」鍵的 JSON 物件，且類型須為此匯入支援的類型）。
+      publish_import: 發佈匯入
+      back_to_imports: 返回匯入列表

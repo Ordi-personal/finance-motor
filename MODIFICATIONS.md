@@ -16,9 +16,9 @@ This fork complies with AGPL-3.0 Section 13 by:
 | Field | Value |
 |-------|-------|
 | **Name** | Sure (formerly Maybe Finance) |
-| **Repository** | https://github.com/maybe-finance/maybe |
+| **Repository** | https://github.com/we-promise/sure |
 | **License** | AGPL-3.0 |
-| **Base Version** | Tag v0.6.8 (February 28, 2026) |
+| **Base Version** | Tag v0.7.1-alpha.11 (May 2026) |
 
 ## Fork Information
 
@@ -27,7 +27,7 @@ This fork complies with AGPL-3.0 Section 13 by:
 | **Fork Repository** | https://github.com/Ordi-personal/finance-motor |
 | **Maintained By** | Ordi Team |
 | **Fork Date** | May 2024 |
-| **Last Upstream Sync** | March 7, 2026 (v0.6.8) |
+| **Last Upstream Sync** | May 25, 2026 (v0.7.1-alpha.11) |
 
 ## Modifications Made
 
@@ -120,18 +120,18 @@ Single sign-on endpoint allowing the Ordi App to authenticate users into the emb
 
 - `GET /auth/sso?token=<jwt>` — Validates JWT and logs the user in
 
-### 9. Embedded Mode (`FluxoIntegration` concern)
+### 9. Embedded Mode (`OrdiIntegration` concern)
 
 **Files:**
-- `app/controllers/concerns/fluxo_integration.rb` (new)
+- `app/controllers/concerns/ordi_integration.rb` (new)
 - `app/controllers/application_controller.rb` (modified)
 
 **Type:** Integration
 **Risk:** Low
 
-Extracted embedded-mode logic into a Rails concern so that all controllers can detect whether the app is running inside the Ordi iframe (`session[:embedded_mode]`). Uses `helper_method :embedded_mode?` to expose the state to views. This replaced a previous `Current.embedded` attribute that was removed in upstream `v0.6.8`.
+Extracted embedded-mode logic into a Rails concern so that all controllers can detect whether the app is running inside the Ordi iframe (`session[:embedded_mode]`). Uses `helper_method :embedded_mode?` to expose the state to views. This remains a fork-only integration layer across upstream syncs.
 
-### 10. Server-to-Server Auth (`X-Fluxo-Secret`)
+### 10. Server-to-Server Auth (`X-Ordi-Secret`)
 
 **File:** `app/controllers/api/v1/base_controller.rb` (modified)
 
@@ -140,12 +140,12 @@ Extracted embedded-mode logic into a Rails concern so that all controllers can d
 
 Added a minimal bypass in the API base controller that allows the Ordi App to authenticate server-to-server requests without a user JWT. The bypass requires:
 
-1. `X-Fluxo-Secret` header matching `ENV["FLUXO_SHARED_SECRET"]` (via `ActiveSupport::SecurityUtils.secure_compare`)
+1. `X-Ordi-Secret` header matching `ENV["ORDI_SHARED_SECRET"]` (via `ActiveSupport::SecurityUtils.secure_compare`)
 2. `X-User-Email` header identifying the target user
 
-The secret is managed via Kamal secrets (`config/deploy.yml` → `env.secret`) and is never hardcoded. If `FLUXO_SHARED_SECRET` is not set, the bypass is fully disabled.
+The secret is managed via deploy secrets and is never hardcoded. If `ORDI_SHARED_SECRET` is not set, the bypass is fully disabled. The bypass is also limited to a small allowlist of internal API paths.
 
-### 11. Ruby Version Pin (3.2.2)
+### 11. Ruby Version Pin (3.4.2)
 
 **Files:**
 - `.ruby-version`
@@ -154,9 +154,20 @@ The secret is managed via Kamal secrets (`config/deploy.yml` → `env.secret`) a
 **Type:** Configuration
 **Risk:** Low
 
-Upstream `v0.6.8` targets Ruby `3.4.7`. This fork pins the runtime to `3.2.2` for compatibility with the current production environment. A separate Ruby upgrade is planned.
+Upstream `v0.7.1-alpha.11` targets Ruby `3.4.7`. This fork currently pins the runtime to `3.4.2` for compatibility with the current production environment. A separate Ruby upgrade is planned.
 
-### 12. Embedded Mode: Hide Logo and Chat Sidebar
+### 12. Local Credentials Pair Preserved Across Upstream Syncs
+
+**Files:**
+- `config/credentials.yml.enc`
+- `config/master.key`
+
+**Type:** Operational safeguard
+**Risk:** Medium
+
+The fork keeps its own encrypted credentials pair. After an upstream base replacement, the local `config/credentials.yml.enc` and `config/master.key` must remain aligned; otherwise Rails boot fails during credentials decryption.
+
+### 13. Embedded Mode: Hide Logo and Chat Sidebar
 
 **File:** `app/views/layouts/application.html.erb` (modified)
 
@@ -169,7 +180,7 @@ When running inside the Ordi iframe (`embedded_mode?`), the main application lay
 - Hides the panel-right toggle button
 - Removes the "Assistente" item from mobile bottom nav
 
-### 13. Onboarding Completeness Fixes
+### 14. Onboarding Completeness Fixes
 
 **Files:**
 - `app/controllers/onboardings_controller.rb` (modified)
@@ -188,7 +199,7 @@ When running inside the Ordi iframe (`embedded_mode?`), the main application lay
 - Completed English and pt-BR translations for all onboarding steps (goals, header nav items, placeholders, field labels).
 - Modified wizard layout to hide logo and sign-out button when in embedded mode (`embedded_mode?`).
 
-### 14. SSO Onboarding Auto-Complete
+### 15. SSO Onboarding Auto-Complete
 
 **File:** `app/controllers/auth/sso_controller.rb` (modified)
 
@@ -222,4 +233,4 @@ This fork maintains the original **AGPL-3.0** license. See [LICENSE](LICENSE) fi
 
 ---
 
-**Last Updated:** March 2026
+**Last Updated:** May 2026

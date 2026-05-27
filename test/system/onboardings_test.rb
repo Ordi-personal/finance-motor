@@ -22,7 +22,7 @@ class OnboardingsTest < ApplicationSystemTestCase
     # Start at the main onboarding page
     visit onboarding_path
 
-    assert_text I18n.t("onboardings.show.title", product_name: Rails.configuration.x.product_name)
+    assert_text I18n.t("onboardings.show.title")
     assert_button I18n.t("onboardings.show.submit")
 
     # Navigate to preferences
@@ -152,7 +152,7 @@ class OnboardingsTest < ApplicationSystemTestCase
   test "trial page renders correctly" do
     visit trial_onboarding_path
 
-    assert_text Rails.configuration.x.product_name
+    assert_text "Sure"
   end
 
   test "navigation between onboarding steps" do

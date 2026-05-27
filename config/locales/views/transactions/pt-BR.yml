@@ -1,6 +1,10 @@
 ---
 pt-BR:
   transactions:
+    selection_bar:
+      duplicate: Duplicar
+      edit: Editar
+      selected: selecionadas
     form:
       account: Conta
       account_prompt: Selecione uma Conta
@@ -23,6 +27,8 @@ pt-BR:
     show:
       account_label: Conta
       amount: Valor
+      tab_transactions: Transações
+      tab_upcoming: Próximas
       category_label: Categoria
       date_label: Data
       delete: Excluir
@@ -49,7 +55,26 @@ pt-BR:
       edit_merchants: Editar comerciantes
       edit_tags: Editar tags
       import: Importar
+    transaction:
+      linked_with_provider: Vinculado com %{provider}
     index:
+      title: Transações
+      transaction: transação
+      transactions: transações
+      import: Importar
+      new_rule: Nova regra
+      edit_rules: Editar regras
+      edit_categories: Editar categorias
+      edit_tags: Editar tags
+      edit_merchants: Editar comerciantes
+      edit_imports: Editar importações
+      new_transaction: Nova transação
+      categorize_button:
+        one: Categorizar (1)
+        other: Categorizar (%{count})
+    list:
+      drag_drop_title: Solte um CSV para importar
+      drag_drop_subtitle: Envie transações diretamente
       transaction: transação
       transactions: transações
     searches:
@@ -85,4 +110,6 @@ pt-BR:
         greater_than: maior que
         less_than: menor que
       form:
+        search_placeholder: Buscar transações...
+        filter: Filtros
         toggle_selection_checkboxes: Alternar todas as caixas de seleção

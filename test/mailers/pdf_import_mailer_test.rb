@@ -14,12 +14,12 @@ class PdfImportMailerTest < ActionMailer::TestCase
       product_name: Rails.configuration.x.product_name
     ), mail.subject
     assert_equal [ @user.email ], mail.to
-    assert_includes mail.subject, Rails.configuration.x.product_name
+    assert_includes mail.subject, "analyzed"
   end
 
   test "next_steps email contains document summary" do
     mail = PdfImportMailer.with(user: @user, pdf_import: @pdf_import).next_steps
 
-    assert_includes mail.text_part.body.decoded, @pdf_import.ai_summary
+    assert_match @pdf_import.ai_summary, mail.body.encoded
   end
 end

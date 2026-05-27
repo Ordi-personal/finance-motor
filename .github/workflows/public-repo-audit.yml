@@ -1,0 +1,20 @@
+name: Public Repo Audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Audit repository for public-safe contents
+        run: bash scripts/public_repo_audit.sh .

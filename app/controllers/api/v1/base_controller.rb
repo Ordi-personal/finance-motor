@@ -3,6 +3,14 @@
 class Api::V1::BaseController < ApplicationController
   include Doorkeeper::Rails::Helpers
 
+  InvalidFilterError = Class.new(StandardError)
+
+  class << self
+    def valid_uuid?(value)
+      UuidFormat.valid?(value)
+    end
+  end
+
   # Skip regular session-based authentication for API
   skip_authentication
 
@@ -30,6 +38,7 @@ class Api::V1::BaseController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
   rescue_from Doorkeeper::Errors::DoorkeeperError, with: :handle_unauthorized
   rescue_from ActionController::ParameterMissing, with: :handle_bad_request
+  rescue_from InvalidFilterError, with: :handle_invalid_filter
 
   private
 
@@ -38,7 +47,7 @@ class Api::V1::BaseController < ApplicationController
       request.format = :json
     end
 
-    # Authenticate using either OAuth, API key, or the internal Ordi secret
+    # Authenticate using OAuth, API key, or the internal Ordi secret.
     def authenticate_request!
       return if authenticate_oauth
       return if authenticate_api_key
@@ -57,7 +66,7 @@ class Api::V1::BaseController < ApplicationController
       # Check token validity and scope (read_write includes read access)
       has_sufficient_scope = access_token&.scopes&.include?("read") || access_token&.scopes&.include?("read_write")
 
-      unless access_token && !access_token.expired? && has_sufficient_scope
+      unless access_token&.accessible? && has_sufficient_scope
         render_json({ error: "unauthorized", message: "Access token is invalid, expired, or missing required scope" }, status: :unauthorized)
         return false
       end
@@ -158,18 +167,15 @@ class Api::V1::BaseController < ApplicationController
       response.headers["X-RateLimit-Reset"] = usage_info[:reset_time].to_s
     end
 
-    # Minimal bypass for Ordi internal ecosystem (server-to-server calls).
-    # Requires ORDI_SHARED_SECRET env var — disabled if not set.
     def authenticate_ordi_secret
       shared_secret = ENV["ORDI_SHARED_SECRET"]
       return false if shared_secret.blank?
-
       return false unless ordi_internal_request_allowed?
 
       secret = request.headers["X-Ordi-Secret"]
-      email  = request.headers["X-User-Email"]
-
-      return false unless ActiveSupport::SecurityUtils.secure_compare(secret.to_s, shared_secret) && email.present?
+      email = request.headers["X-User-Email"]
+      return false unless email.present?
+      return false unless ActiveSupport::SecurityUtils.secure_compare(secret.to_s, shared_secret)
 
       @current_user = User.find_by(email: email)
       return false unless @current_user
@@ -244,9 +250,39 @@ class Api::V1::BaseController < ApplicationController
       true
     end
 
+    def ensure_read_scope
+      authorize_scope!(:read)
+    end
+
     # Consistent JSON response method
     def render_json(data, status: :ok)
       render json: data, status: status
+    end
+
+    def valid_uuid?(value)
+      self.class.valid_uuid?(value)
+    end
+
+    def safe_page_param
+      page = params[:page].to_i
+      page > 0 ? page : 1
+    end
+
+    def safe_per_page_param
+      per_page = params[:per_page].to_i
+      case per_page
+      when 1..100   then per_page
+      when (101..)  then 100
+      else               25
+      end
+    end
+
+    def render_validation_error(message)
+      render_json({
+        error: "validation_failed",
+        message: message,
+        errors: [ message ]
+      }, status: :unprocessable_entity)
     end
 
     # Error handlers
@@ -265,6 +301,16 @@ class Api::V1::BaseController < ApplicationController
       render_json({ error: "bad_request", message: "Required parameters are missing or invalid" }, status: :bad_request)
     end
 
+    def handle_invalid_filter(exception)
+      render_validation_error(exception.message)
+    end
+
+    def parse_date_param(key)
+      Date.iso8601(params[key].to_s)
+    rescue ArgumentError
+      raise InvalidFilterError, "#{key} must be an ISO 8601 date"
+    end
+
     # Log API access for monitoring and debugging
     def log_api_access
       return unless current_resource_owner
@@ -274,8 +320,6 @@ class Api::V1::BaseController < ApplicationController
         "OAuth Token"
       when :api_key
         "API Key: #{@api_key.name}"
-      when :ordi_secret
-        "Ordi Secret"
       else
         "Unknown"
       end
