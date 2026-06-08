@@ -124,3 +124,7 @@ scripts/
 .claude_settings.json
 .security-key
 logs/security/
+
+# Kamal secrets
+.kamal/secrets
+
