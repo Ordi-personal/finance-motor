@@ -104,7 +104,11 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   # Enable DNS rebinding protection and other `Host` header attacks.
-  allowed_hosts = HostListParser.parse_hosts(ENV["HTTP_ALLOWED_HOSTS"], ENV["APP_DOMAIN"])
+  allowed_hosts = HostListParser.parse_hosts(
+    ENV["HTTP_ALLOWED_HOSTS"],
+    ENV["APP_DOMAIN"],
+    ENV["LEGACY_HTTP_ALLOWED_HOSTS"]
+  )
   if allowed_hosts.any?
     allowed_hosts.each { |host| config.hosts << host }
     config.host_authorization = { exclude: ->(request) { request.path == "/up" || request.headers["X-Ordi-Secret"].present? } }

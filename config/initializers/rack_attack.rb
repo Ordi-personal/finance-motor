@@ -24,11 +24,13 @@ class Rack::Attack
     request.ip if request.path.start_with?("/admin/")
   end
 
-  # Determine limits based on self-hosted mode
+  # Determine limits based on self-hosted mode (override via env in production)
   self_hosted = Rails.application.config.app_mode.self_hosted?
+  token_limit = ENV.fetch("API_RATE_LIMIT_TOKEN", self_hosted ? 10_000 : 100).to_i
+  ip_limit = ENV.fetch("API_RATE_LIMIT_IP", self_hosted ? 20_000 : 200).to_i
 
   # Throttle API requests per access token
-  throttle("api/requests", limit: self_hosted ? 10_000 : 100, period: 1.hour) do |request|
+  throttle("api/requests", limit: token_limit, period: 1.hour) do |request|
     if request.path.start_with?("/api/")
       # Extract access token from Authorization header
       auth_header = request.get_header("HTTP_AUTHORIZATION")
@@ -43,7 +45,7 @@ class Rack::Attack
   end
 
   # More permissive throttling for API requests by IP (for development/testing)
-  throttle("api/ip", limit: self_hosted ? 20_000 : 200, period: 1.hour) do |request|
+  throttle("api/ip", limit: ip_limit, period: 1.hour) do |request|
     request.ip if request.path.start_with?("/api/")
   end
 

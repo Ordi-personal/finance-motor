@@ -44,8 +44,12 @@ env:
     SELF_HOSTED: true
     ONBOARDING_STATE: closed
     ENABLE_FRAME_ANCESTORS: true
-    HTTP_ALLOWED_HOSTS: https://finance.seudominio.com,https://finance.antigo-seudominio.com
+    HTTP_ALLOWED_HOSTS: https://finance.seudominio.com,finance-motor-web
+    # Opcional — hosts legados:
+    # LEGACY_HTTP_ALLOWED_HOSTS: https://finance.antigo-seudominio.com
     FRAME_ANCESTORS_HOSTS: https://app.seudominio.com,https://admin.seudominio.com
+    API_RATE_LIMIT_TOKEN: 500
+    API_RATE_LIMIT_IP: 1000
     RAILS_SERVE_STATIC_FILES: true
     RAILS_ASSUME_SSL: true
 
