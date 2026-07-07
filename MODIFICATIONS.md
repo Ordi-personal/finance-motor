@@ -116,7 +116,7 @@ Pass current timezone to `timezone_options` helper to ensure the selected timezo
 **Type:** New Feature
 **Risk:** Medium
 
-Single sign-on endpoint allowing the Ordi App to authenticate users into the embedded iframe via a short-lived JWT token. The token is signed with `RAILS_MASTER_KEY`-derived secret, validated on arrival, and exchanged for a Rails session.
+Single sign-on endpoint allowing the Ordi App to authenticate users into the embedded iframe via a short-lived JWT token. The token is signed with the secret in `ENV["SSO_SECRET_KEY"]` (a dedicated shared secret managed via deploy config, **not** derived from `RAILS_MASTER_KEY`), validated on arrival (issuer/audience/expiry/replay checks), and exchanged for a Rails session.
 
 - `GET /auth/sso?token=<jwt>` — Validates JWT and logs the user in
 
@@ -208,6 +208,51 @@ When running inside the Ordi iframe (`embedded_mode?`), the main application lay
 
 SSO callback now ensures existing users have `onboarded_at` set (skipping onboarding) and syncs profile data (first_name, last_name, locale, currency, country) from the JWT payload. New users also receive profile data from the JWT instead of email-derived defaults.
 
+### 16. Accounts API: `POST /api/v1/accounts`
+
+**Files:**
+- `app/controllers/api/v1/accounts_controller.rb` (modified — new `create` action + scoped before_actions; `index`/`show` untouched)
+- `app/views/api/v1/accounts/_account.json.jbuilder` (modified — 1 line added)
+- `config/routes.rb` (modified — 1 line added to the existing `resources :accounts` entry)
+- `spec/requests/api/v1/accounts_spec.rb`, `spec/swagger_helper.rb` (modified — OpenAPI docs for the new endpoint + `available_credit` field)
+- `test/controllers/api/v1/accounts_controller_test.rb` (modified — new tests appended)
+
+**Type:** API Enhancement
+**Risk:** Low-Medium
+
+Adds account creation to the existing read-only Accounts API so the Ordi App no longer has to write directly into Sure's Postgres database to create accounts. Reuses `Account.create_and_sync` (the same path the web `AccountableResource` controllers use), so opening-balance anchors, `owner` assignment, and post-create sync all follow upstream's own creation semantics — no account-creation business logic was reimplemented. Requires the `write` scope (`read_write` API key scope, or the `X-Ordi-Secret` S2S bypass, which is already granted full read/write scopes). Accepts `name`, `balance`, `currency`, `subtype` (defaults to the accountable type's own default, e.g. `checking` for Depository), and `accountable_type` (defaults to `Depository`; validated against `Accountable::TYPES`).
+
+- `POST /api/v1/accounts` — `{ "account": { "name": "...", "balance": 100, "currency": "BRL" } }` → `201` with the same JSON shape as `GET /api/v1/accounts/:id`, or `422` on validation failure.
+
+### 17. `available_credit` on Account Serialization
+
+**File:** `app/views/api/v1/accounts/_account.json.jbuilder` (modified — 1 line added; shared with item 16 above)
+
+**Type:** API Enhancement
+**Risk:** Low
+
+Exposes `account.accountable.available_credit` as `available_credit` in the account JSON payload when the account's accountable is a `CreditCard`. Omitted entirely for all other account types.
+
+### 18. Provisioning API: `POST /api/v1/provisioning`
+
+**Files:**
+- `app/controllers/api/v1/provisioning_controller.rb` (new)
+- `app/services/saas/user_provisioning_service.rb` (new)
+- `config/routes.rb` (modified — 1 line added)
+- `app/controllers/api/v1/base_controller.rb` (modified — 1 line added to `ORDI_ALLOWED_PATHS`)
+- `test/controllers/api/v1/provisioning_controller_test.rb` (new)
+
+**Type:** New Feature
+**Risk:** Medium
+
+Internal server-to-server endpoint that lets the Ordi App provision a fully-onboarded Sure user (Family + User + default pt-BR categories/rules via `Saas::InitialDataService` + trial subscription + optional initial account) in one call, instead of writing Family/User/Subscription rows directly into Sure's database. `Saas::UserProvisioningService` mirrors `Auth::SsoController#create_sso_user`'s Family/User/bootstrap/`start_trial_subscription!` sequence exactly (extracted into its own additive service rather than modifying the SSO controller) so a provisioned user is indistinguishable from one created via the SSO callback.
+
+Authentication is intentionally narrower than the rest of the API: only the `X-Ordi-Secret` shared secret is accepted (OAuth and `X-Api-Key` are rejected), since this endpoint can create user accounts. It does **not** reuse `BaseController#authenticate_ordi_secret` because that method requires an *existing* user (it looks one up by `X-User-Email` and fails otherwise) — provisioning must work for brand-new emails too. Idempotent: a second call for an already-provisioned email returns the existing user/family (`created: false`, `HTTP 200`) instead of erroring.
+
+- `POST /api/v1/provisioning` — `{ "email": "...", "first_name": "...", "last_name": "...", "time_zone": "...", "currency": "...", "locale": "...", "initial_account": { "name": "Dinheiro", "balance": 0, "currency": "BRL", "subtype": "cash" } }` → `201` (new) or `200` (idempotent replay) with `{ "created": bool, "user": {...}, "family": {...}, "account": {...} | null }`. `initial_account.subtype` is optional (defaults to `checking`); Ordi passes `cash` for its default "Dinheiro" account to match historical provisioning.
+
+**Known limitation:** like `Auth::SsoController#create_sso_user`, `Saas::InitialDataService.bootstrap!` unconditionally overwrites the family's `currency`/`locale`/`country`/`date_format` to `BRL`/`pt-BR`/`BR`/`%d/%m/%Y` regardless of what was passed in. This is pre-existing upstream-fork behavior (see item 6), not something introduced or changed here.
+
 ## What Is NOT Modified
 
 - Core financial calculation engine
@@ -233,4 +278,4 @@ This fork maintains the original **AGPL-3.0** license. See [LICENSE](LICENSE) fi
 
 ---
 
-**Last Updated:** May 2026
+**Last Updated:** July 2026

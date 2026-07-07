@@ -1,0 +1,64 @@
+service: finance-motor
+image: vagneralencar/finance-motor
+deploy_timeout: 120
+
+servers:
+  web:
+    hosts:
+      - 167.86.123.161
+    options:
+      network-alias: finance-motor-web
+    labels:
+      kamal-proxy.host: finance.ordime.app
+      kamal-proxy.ssl: "true"
+      kamal-proxy.app_port: 4000
+  job:
+    hosts:
+      - 167.86.123.161
+    cmd: bundle exec sidekiq
+
+registry:
+  server: ghcr.io
+  username: vagneralencar
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+env:
+  secret:
+    - RAILS_MASTER_KEY
+    - DATABASE_URL
+    - REDIS_URL
+    - SECRET_KEY_BASE
+    - ORDI_SHARED_SECRET
+    - SSO_SECRET_KEY
+    - SIDEKIQ_WEB_USERNAME
+    - SIDEKIQ_WEB_PASSWORD
+  clear:
+    PORT: 4000
+    APP_DOMAIN: finance.ordime.app
+    APP_URL: https://finance.ordime.app
+    BRAND_NAME: "Ordi"
+    PRODUCT_NAME: "Ordi Finance"
+    SELF_HOSTED: true
+    ONBOARDING_STATE: closed
+    ENABLE_FRAME_ANCESTORS: true
+    HTTP_ALLOWED_HOSTS: https://finance.ordime.app,finance-motor-web
+    FRAME_ANCESTORS_HOSTS: https://ordime.app,https://admin.ordime.app
+    API_RATE_LIMIT_TOKEN: 500
+    API_RATE_LIMIT_IP: 1000
+    RAILS_SERVE_STATIC_FILES: true
+    RAILS_ASSUME_SSL: true
+
+proxy:
+  ssl: true
+  host: finance.ordime.app
+  app_port: 4000
+  healthcheck:
+    path: /up
+    interval: 5
+    timeout: 5
+
+builder:
+  arch: amd64
+  args:
+    RUBY_VERSION: 3.4.2

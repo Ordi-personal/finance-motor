@@ -493,7 +493,8 @@ Rails.application.routes.draw do
       resource :preferences, only: %i[show update]
 
       # Production API endpoints
-      resources :accounts, only: [ :index, :show ]
+      resources :accounts, only: [ :index, :show, :create ]
+      post "provisioning", to: "provisioning#create"
       resources :balances, only: [ :index, :show ]
       resources :budgets, only: [ :index, :show ]
       resources :budget_categories, only: [ :index, :show ]

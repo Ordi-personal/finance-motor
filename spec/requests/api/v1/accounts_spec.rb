@@ -103,6 +103,54 @@ RSpec.describe 'API V1 Accounts', type: :request do
         run_test!
       end
     end
+
+    post 'Create an account' do
+      tags 'Accounts'
+      security [ { apiKeyAuth: [] } ]
+      consumes 'application/json'
+      produces 'application/json'
+      parameter name: :body, in: :body, required: true, schema: {
+        type: :object,
+        properties: {
+          account: {
+            type: :object,
+            properties: {
+              name: { type: :string, description: 'Account name (required)' },
+              balance: { type: :number, description: 'Starting balance' },
+              currency: { type: :string, description: 'Currency code (defaults to family currency)' },
+              subtype: { type: :string, description: "Accountable subtype (defaults to 'checking' for Depository accounts)" },
+              accountable_type: { type: :string, description: "One of Depository, Investment, Crypto, Property, Vehicle, OtherAsset, CreditCard, Loan, OtherLiability (defaults to Depository)" }
+            },
+            required: %w[name]
+          }
+        },
+        required: %w[account]
+      }
+
+      let(:body) do
+        {
+          account: {
+            name: 'API Created Checking',
+            balance: 500,
+            currency: 'USD'
+          }
+        }
+      end
+
+      response '201', 'account created' do
+        schema '$ref' => '#/components/schemas/AccountDetail'
+
+        run_test!
+      end
+
+      response '422', 'validation error - missing name' do
+        schema '$ref' => '#/components/schemas/ErrorResponse'
+
+        let(:body) { { account: { name: '', currency: 'USD' } } }
+
+        run_test!
+      end
+    end
   end
 
   path '/api/v1/accounts/{id}' do

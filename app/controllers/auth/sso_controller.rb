@@ -97,13 +97,23 @@ end
 
           Saas::InitialDataService.bootstrap!(family)
 
+          # Ordi already ran its own onboarding before this SSO hop — the user
+          # should never hit Sure's separate "Experimente o Sure por 45 dias"
+          # trial-activation gate (Family::Subscribeable#needs_subscription?)
+          # on top of it.
+          family.start_trial_subscription!
+
           user = family.users.create!(
             email: payload["email"],
             first_name: first,
             last_name: last,
             password: SecureRandom.hex(16),
             onboarded_at: Time.current,
-            role: "admin"
+            role: "admin",
+            # Ordi's own chrome has no dark theme yet; default embedded Sure
+            # users to light so the two frames don't visually clash. Users can
+            # still switch to dark themselves from Sure's own settings.
+            theme: "light"
           )
 
           Rails.logger.info("[SSO] Created user #{user.email} with family #{family.name}")

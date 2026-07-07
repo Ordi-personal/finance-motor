@@ -16,6 +16,13 @@ class Api::V1::AccountsControllerTest < ActionDispatch::IntegrationTest
       source: "web",
       display_key: "test_read_#{SecureRandom.hex(8)}"
     )
+    @write_api_key = ApiKey.create!(
+      user: @user,
+      name: "Test Read Write Key",
+      scopes: [ "read_write" ],
+      source: "mobile",
+      display_key: "test_read_write_#{SecureRandom.hex(8)}"
+    )
 
     @other_family_user.api_keys.active.destroy_all
     @other_family_api_key = ApiKey.create!(
@@ -225,6 +232,90 @@ class Api::V1::AccountsControllerTest < ActionDispatch::IntegrationTest
       assert_response :success
       assert_equal subtype, JSON.parse(response.body)["subtype"]
     end
+  end
+
+  test "should create a checking account" do
+    assert_difference "@user.family.accounts.count", 1 do
+      post "/api/v1/accounts",
+           params: { account: { name: "New Checking", balance: 250.55, currency: "USD" } },
+           headers: api_headers(@write_api_key)
+    end
+
+    assert_response :created
+    response_body = JSON.parse(response.body)
+
+    created_account = @user.family.accounts.find(response_body["id"])
+    assert_equal "New Checking", created_account.name
+    assert_equal "checking", created_account.subtype
+    assert_equal "depository", response_body["account_type"]
+    assert_equal "checking", response_body["subtype"]
+    assert_equal @user.id, created_account.owner_id
+  end
+
+  test "should create a credit card account with custom subtype and accountable_type" do
+    post "/api/v1/accounts",
+         params: { account: { name: "New Credit Card", balance: 0, currency: "USD", accountable_type: "CreditCard", subtype: "credit_card" } },
+         headers: api_headers(@write_api_key)
+
+    assert_response :created
+    response_body = JSON.parse(response.body)
+    assert_equal "credit_card", response_body["account_type"]
+    assert_equal "credit_card", response_body["subtype"]
+  end
+
+  test "should require authentication on create" do
+    post "/api/v1/accounts", params: { account: { name: "No Auth", balance: 0, currency: "USD" } }
+
+    assert_response :unauthorized
+  end
+
+  test "should require write scope on create" do
+    post "/api/v1/accounts",
+         params: { account: { name: "Read Only", balance: 0, currency: "USD" } },
+         headers: api_headers(@api_key)
+
+    assert_response :forbidden
+    response_body = JSON.parse(response.body)
+    assert_equal "insufficient_scope", response_body["error"]
+  end
+
+  test "should return 422 for invalid create payload" do
+    post "/api/v1/accounts",
+         params: { account: { name: "", balance: 0, currency: "USD" } },
+         headers: api_headers(@write_api_key)
+
+    assert_response :unprocessable_entity
+    response_body = JSON.parse(response.body)
+    assert_equal "validation_failed", response_body["error"]
+    assert response_body["errors"].present?
+  end
+
+  test "should return 422 for unknown accountable_type on create" do
+    post "/api/v1/accounts",
+         params: { account: { name: "Bad Type", balance: 0, currency: "USD", accountable_type: "NotARealType" } },
+         headers: api_headers(@write_api_key)
+
+    assert_response :unprocessable_entity
+  end
+
+  test "should expose available_credit for credit card accounts" do
+    credit_card = accounts(:credit_card)
+
+    get "/api/v1/accounts/#{credit_card.id}", headers: api_headers(@api_key)
+
+    assert_response :success
+    response_body = JSON.parse(response.body)
+    assert_equal credit_card.accountable.available_credit.to_f, response_body["available_credit"].to_f
+  end
+
+  test "should not expose available_credit for non credit card accounts" do
+    depository = accounts(:depository)
+
+    get "/api/v1/accounts/#{depository.id}", headers: api_headers(@api_key)
+
+    assert_response :success
+    response_body = JSON.parse(response.body)
+    assert_not response_body.key?("available_credit")
   end
 
   test "should not return other family's accounts" do
