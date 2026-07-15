@@ -35,7 +35,7 @@ module SelfHostable
     end
 
     def redis_connected?
-      Redis.new.ping
+      Redis.new(url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0")).ping
       true
     rescue Redis::CannotConnectError
       false

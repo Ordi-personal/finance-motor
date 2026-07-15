@@ -1,6 +1,16 @@
 ---
 pt-BR:
   pages:
+    redis_configuration_error:
+      page_title: Redis requer configuração - Sure
+      heading: Configuração do Redis necessária
+      subheading: A instalação auto-hospedada do Sure precisa que o Redis esteja configurado corretamente.
+      why_required_title: Por que o Redis é necessário?
+      why_required_body: O Sure usa o Redis para executar tarefas em segundo plano, como sincronizar contas, processar importações e manter seus dados financeiros atualizados.
+      view_setup_guide: Ver guia de configuração
+      setup_guide_hint: Consulte nosso guia completo de configuração com Docker para configurar o Redis.
+      refresh_hint: Depois de configurar o Redis, atualize esta página para continuar.
+      refresh_page: Atualizar página
     changelog:
       title: Novidades
     dashboard:

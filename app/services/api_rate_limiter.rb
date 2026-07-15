@@ -10,7 +10,7 @@ class ApiRateLimiter
 
   def initialize(api_key)
     @api_key = api_key
-    @redis = Redis.new
+    @redis = Redis.new(url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0"))
   end
 
   # Check if the API key has exceeded its rate limit
