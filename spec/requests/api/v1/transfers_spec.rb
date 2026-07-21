@@ -124,6 +124,60 @@ RSpec.describe 'API V1 Transfers', type: :request do
         run_test!
       end
     end
+
+    post 'Create a transfer' do
+      tags 'Transfers'
+      security [ { apiKeyAuth: [] } ]
+      consumes 'application/json'
+      produces 'application/json'
+      parameter name: :transfer_payload, in: :body, schema: {
+        type: :object,
+        properties: {
+          transfer: {
+            type: :object,
+            properties: {
+              from_account_id: { type: :string, format: :uuid },
+              to_account_id: { type: :string, format: :uuid },
+              amount: { type: :number, description: 'Positive amount in the source account currency' },
+              date: { type: :string, format: :date, description: 'Defaults to today' },
+              exchange_rate: { type: :number, nullable: true }
+            },
+            required: %w[from_account_id to_account_id amount]
+          }
+        },
+        required: %w[transfer]
+      }
+
+      response '201', 'transfer created' do
+        schema '$ref' => '#/components/schemas/TransferDecision'
+
+        let(:transfer_payload) do
+          { transfer: { from_account_id: checking.id, to_account_id: savings.id, amount: 50, date: Date.current.to_s } }
+        end
+
+        run_test!
+      end
+
+      response '422', 'validation failed' do
+        schema '$ref' => '#/components/schemas/ErrorResponse'
+
+        let(:transfer_payload) do
+          { transfer: { from_account_id: 'not-a-uuid', to_account_id: savings.id, amount: 50 } }
+        end
+
+        run_test!
+      end
+
+      response '404', 'account not found' do
+        schema '$ref' => '#/components/schemas/ErrorResponse'
+
+        let(:transfer_payload) do
+          { transfer: { from_account_id: checking.id, to_account_id: SecureRandom.uuid, amount: 50 } }
+        end
+
+        run_test!
+      end
+    end
   end
 
   path '/api/v1/transfers/{id}' do

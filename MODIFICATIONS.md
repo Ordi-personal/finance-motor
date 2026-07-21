@@ -274,6 +274,30 @@ Contributions to this fork are welcome. Note that:
 
 ## License
 
+### 19. Transfers API: `POST /api/v1/transfers`
+
+**Files:**
+- `app/controllers/api/v1/transfers_controller.rb` (modified — new `create` action + scoped before_actions; `index`/`show` untouched)
+- `config/routes.rb` (modified — `:create` added to the existing `resources :transfers` entry)
+- `spec/requests/api/v1/transfers_spec.rb` (modified — OpenAPI docs for the new endpoint)
+- `test/controllers/api/v1/transfers_controller_test.rb` (modified — new tests appended)
+
+**Type:** API Enhancement
+**Risk:** Low-Medium
+
+Adds transfer creation to the existing read-only Transfers API so the Ordi App's "create_transfer" assistant tool works over HTTP (it previously called a nonexistent endpoint). Reuses `Transfer::Creator` — the exact same path the web `TransfersController#create` uses — so account lookup scoping (family-only), transaction pairing, status and post-create account syncs all follow upstream's own creation semantics; no transfer business logic was reimplemented. Requires the `write` scope (`read_write` API key, or the `X-Ordi-Secret` S2S bypass). Payload mirrors the web form: `{ "transfer": { "from_account_id", "to_account_id", "amount", "date" (optional, defaults to today), "exchange_rate" (optional) } }` → `201` with the same JSON shape as `GET /api/v1/transfers/:id`, `422` on validation failure, `404` when either account is outside the caller's family.
+
+### 20. S2S Allowlist Correction (`ORDI_ALLOWED_PATHS`)
+
+**File:** `app/controllers/api/v1/base_controller.rb` (modified — allowlist introduced in item 10)
+
+**Type:** Bug Fix
+**Risk:** Low
+
+Two corrections to the internal allowlist used by the `X-Ordi-Secret` bypass:
+- Added `/api/v1/categories`: the Ordi App resolves category names to ids via `GET /api/v1/categories` before creating transactions; without the entry the request was rejected (401) and every transaction was silently created without a category.
+- Removed `/api/v1/insights`: that route has never existed in this codebase (nor upstream) — the entry only masked broken callers on the Ordi App side, which have now been cleaned up.
+
 This fork maintains the original **AGPL-3.0** license. See [LICENSE](LICENSE) file.
 
 ---

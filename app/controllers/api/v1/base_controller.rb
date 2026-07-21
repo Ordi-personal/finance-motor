@@ -191,7 +191,7 @@ class Api::V1::BaseController < ApplicationController
       /api/v1/transactions
       /api/v1/transfers
       /api/v1/imports
-      /api/v1/insights
+      /api/v1/categories
       /api/v1/provisioning
     ].freeze
 

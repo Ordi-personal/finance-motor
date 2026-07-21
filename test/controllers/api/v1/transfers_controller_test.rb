@@ -184,7 +184,68 @@ class Api::V1::TransfersControllerTest < ActionDispatch::IntegrationTest
     api_key_without_read&.destroy
   end
 
+  test "creates a transfer with write scope" do
+    assert_difference "Transfer.count", 1 do
+      post api_v1_transfers_url,
+        params: {
+          transfer: {
+            from_account_id: @account.id,
+            to_account_id: @destination_account.id,
+            amount: 75,
+            date: "2024-02-01"
+          }
+        },
+        headers: api_headers(read_write_api_key)
+    end
+
+    assert_response :created
+    response_data = JSON.parse(response.body)
+    assert_equal "Transfer Checking", response_data.dig("outflow_transaction", "account", "name")
+    assert_equal "Transfer Savings", response_data.dig("inflow_transaction", "account", "name")
+  end
+
+  test "rejects create with read-only scope" do
+    assert_no_difference "Transfer.count" do
+      post api_v1_transfers_url,
+        params: { transfer: { from_account_id: @account.id, to_account_id: @destination_account.id, amount: 75 } },
+        headers: api_headers(@api_key)
+    end
+
+    assert_response :forbidden
+  end
+
+  test "returns not found when creating with another family's account" do
+    other_account = families(:empty).accounts.create!(name: "Foreign", accountable: Depository.new, balance: 0, currency: "USD")
+
+    assert_no_difference "Transfer.count" do
+      post api_v1_transfers_url,
+        params: { transfer: { from_account_id: @account.id, to_account_id: other_account.id, amount: 75 } },
+        headers: api_headers(read_write_api_key)
+    end
+
+    assert_response :not_found
+  end
+
+  test "rejects create with malformed account ids" do
+    post api_v1_transfers_url,
+      params: { transfer: { from_account_id: "not-a-uuid", to_account_id: @destination_account.id, amount: 75 } },
+      headers: api_headers(read_write_api_key)
+
+    assert_response :unprocessable_entity
+    assert_equal "validation_failed", JSON.parse(response.body)["error"]
+  end
+
   private
+
+    def read_write_api_key
+      @read_write_api_key ||= ApiKey.create!(
+        user: @user,
+        name: "Test Read Write Key (create)",
+        scopes: [ "read_write" ],
+        source: "mobile",
+        display_key: "test_rw_create_#{SecureRandom.hex(8)}"
+      )
+    end
 
     def create_transaction(account, amount:, date:, name:)
       entry = account.entries.create!(
