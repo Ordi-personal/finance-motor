@@ -298,6 +298,21 @@ Two corrections to the internal allowlist used by the `X-Ordi-Secret` bypass:
 - Added `/api/v1/categories`: the Ordi App resolves category names to ids via `GET /api/v1/categories` before creating transactions; without the entry the request was rejected (401) and every transaction was silently created without a category.
 - Removed `/api/v1/insights`: that route has never existed in this codebase (nor upstream) — the entry only masked broken callers on the Ordi App side, which have now been cleaned up.
 
+### 21. Idempotência opcional na criação de transferências
+
+**Arquivos:** `app/controllers/api/v1/transfers_controller.rb`, `app/models/transfer/creator.rb`, `app/views/api/v1/transfers/_transfer.json.jbuilder`, testes e contrato OpenAPI.
+
+O endpoint `POST /api/v1/transfers` aceita `external_id` e `source` opcionais. Quando presentes, os dois lados da transferência recebem a mesma chave durável de `Entry`; replay retorna a transferência existente (HTTP 200), inclusive sob corrida protegida pelo índice único de entradas. A alteração é aditiva e mantém o comportamento original quando os campos não são enviados, permitindo upstream sem mudança de regra contábil.
+
+### 22. Filtros de leitura por `external_id` e `source`
+
+**Arquivos:** `app/controllers/api/v1/transactions_controller.rb`, `app/controllers/concerns/api/v1/transfer_decision_filtering.rb`, `spec/requests/api/v1/transactions_spec.rb`, `spec/requests/api/v1/transfers_spec.rb`, `docs/api/openapi.yaml`
+
+**Tipo:** API Enhancement / Reconciliação
+**Risco:** Low-Medium
+
+Os endpoints de leitura existentes (`GET /api/v1/transactions` e `GET /api/v1/transfers`) aceitam `external_id` e `source` como filtros opcionais. Os filtros permanecem dentro do escopo de família e contas acessíveis e permitem que o Ordi reconcilie operações cujo commit teve resposta desconhecida, sem acesso direto ao banco do Sure. Não há nova rota, alteração de autenticação ou exposição de segredo; a mudança é aditiva e upstream-friendly.
+
 This fork maintains the original **AGPL-3.0** license. See [LICENSE](LICENSE) file.
 
 ---

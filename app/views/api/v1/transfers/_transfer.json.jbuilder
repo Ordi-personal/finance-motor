@@ -19,3 +19,5 @@ end
 
 json.created_at transfer.created_at.iso8601
 json.updated_at transfer.updated_at.iso8601
+json.external_id transfer.outflow_transaction.entry.external_id
+json.source transfer.outflow_transaction.entry.source

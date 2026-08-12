@@ -1,5 +1,5 @@
 class Transfer::Creator
-  def initialize(family:, source_account_id:, destination_account_id:, date:, amount:, exchange_rate: nil)
+  def initialize(family:, source_account_id:, destination_account_id:, date:, amount:, exchange_rate: nil, external_id: nil, source: nil)
     @family = family
     @source_account = family.accounts.find(source_account_id) # early throw if not found
     @destination_account = family.accounts.find(destination_account_id) # early throw if not found
@@ -13,6 +13,8 @@ class Transfer::Creator
     else
       @exchange_rate = nil
     end
+    @external_id = external_id.presence
+    @source = source.presence
   end
 
   def create
@@ -45,6 +47,8 @@ class Transfer::Creator
           currency: source_account.currency,
           date: date,
           name: name,
+          external_id: external_id,
+          source: source,
           user_modified: true, # Protect from provider sync claiming this entry
         )
       )
@@ -64,6 +68,8 @@ class Transfer::Creator
           currency: destination_account.currency,
           date: date,
           name: name,
+          external_id: external_id,
+          source: source,
           user_modified: true, # Protect from provider sync claiming this entry
         )
       )
@@ -107,5 +113,13 @@ class Transfer::Creator
       else
         "Transfer"
       end
+    end
+
+    def external_id
+      @external_id
+    end
+
+    def source
+      @source
     end
 end

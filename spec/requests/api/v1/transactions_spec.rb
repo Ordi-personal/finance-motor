@@ -116,6 +116,10 @@ RSpec.describe 'API V1 Transactions', type: :request do
                 schema: { type: :string, enum: %w[income expense] }
       parameter name: :search, in: :query, type: :string, required: false,
                 description: 'Search by name, notes, or merchant name'
+      parameter name: :external_id, in: :query, type: :string, required: false,
+                description: 'Filter by durable external idempotency key'
+      parameter name: :source, in: :query, type: :string, required: false,
+                description: 'Filter by external idempotency source namespace'
       parameter name: :account_ids, in: :query, required: false,
                 description: 'Filter by multiple account IDs',
                 schema: { type: :array, items: { type: :string } }

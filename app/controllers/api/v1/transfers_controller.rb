@@ -38,13 +38,20 @@ class Api::V1::TransfersController < Api::V1::BaseController
       return render_validation_error("from_account_id and to_account_id must be valid account ids")
     end
 
+    if idempotency_external_id.present?
+      @transfer = existing_idempotent_transfer(from_id)
+      return render(:show, status: :ok) if @transfer
+    end
+
     @transfer = Transfer::Creator.new(
       family: current_resource_owner.family,
       source_account_id: from_id,
       destination_account_id: to_id,
       date: transfer_create_params[:date].present? ? Date.parse(transfer_create_params[:date].to_s) : Date.current,
       amount: transfer_create_params[:amount].to_d,
-      exchange_rate: transfer_create_params[:exchange_rate].presence&.to_d
+      exchange_rate: transfer_create_params[:exchange_rate].presence&.to_d,
+      external_id: idempotency_external_id,
+      source: idempotency_source
     ).create
 
     if @transfer.persisted?
@@ -58,6 +65,11 @@ class Api::V1::TransfersController < Api::V1::BaseController
     end
   rescue ActiveRecord::RecordNotFound
     render_json({ error: "not_found", message: "Account not found" }, status: :not_found)
+  rescue ActiveRecord::RecordNotUnique
+    @transfer = existing_idempotent_transfer(from_id)
+    return render(:show, status: :ok) if @transfer
+
+    raise
   rescue Money::ConversionError
     render_validation_error("Exchange rate unavailable for selected currencies and date")
   rescue ArgumentError => e
@@ -81,6 +93,26 @@ class Api::V1::TransfersController < Api::V1::BaseController
     end
 
     def transfer_create_params
-      params.require(:transfer).permit(:from_account_id, :to_account_id, :amount, :date, :exchange_rate)
+      params.require(:transfer).permit(:from_account_id, :to_account_id, :amount, :date, :exchange_rate, :external_id, :source)
+    end
+
+    def idempotency_external_id
+      value = transfer_create_params[:external_id]
+      value.to_s.presence if value.is_a?(String) || value.is_a?(Numeric)
+    end
+
+    def idempotency_source
+      value = transfer_create_params[:source]
+      value.to_s.presence || "api"
+    end
+
+    def existing_idempotent_transfer(account_id)
+      return unless idempotency_external_id.present?
+
+      entry = current_resource_owner.family.accounts.find(account_id).entries.find_by(
+        external_id: idempotency_external_id,
+        source: idempotency_source
+      )
+      entry&.entryable&.transfer
     end
 end

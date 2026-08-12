@@ -56,6 +56,8 @@ The `GET /api/v1/transactions` endpoint supports the following query parameters 
 | `max_amount` | number | Filter by maximum amount |
 | `type` | string | Filter by transaction type: `income` or `expense` |
 | `search` | string | Search by name, notes, or merchant name |
+| `external_id` | string | Filter by durable external idempotency key |
+| `source` | string | Filter by external idempotency source namespace |
 
 ## Transaction object
 

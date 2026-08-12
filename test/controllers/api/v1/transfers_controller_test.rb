@@ -116,6 +116,18 @@ class Api::V1::TransfersControllerTest < ActionDispatch::IntegrationTest
     assert_includes response_data["transfers"].map { |transfer| transfer["id"] }, @transfer.id
   end
 
+  test "filters transfers by external_id and source" do
+    @transfer.outflow_transaction.entry.update!(external_id: "reconcile-transfer-1", source: "ordi_app")
+
+    get api_v1_transfers_url,
+        params: { external_id: "reconcile-transfer-1", source: "ordi_app" },
+        headers: api_headers(@api_key)
+
+    assert_response :success
+    response_data = JSON.parse(response.body)
+    assert_equal [ @transfer.id ], response_data["transfers"].map { |transfer| transfer["id"] }
+  end
+
   test "rejects malformed account_id filter" do
     get api_v1_transfers_url, params: { account_id: "not-a-uuid" }, headers: api_headers(@api_key)
 
@@ -202,6 +214,28 @@ class Api::V1::TransfersControllerTest < ActionDispatch::IntegrationTest
     response_data = JSON.parse(response.body)
     assert_equal "Transfer Checking", response_data.dig("outflow_transaction", "account", "name")
     assert_equal "Transfer Savings", response_data.dig("inflow_transaction", "account", "name")
+  end
+
+  test "replays an idempotent transfer without creating a duplicate" do
+    payload = {
+      transfer: {
+        from_account_id: @account.id,
+        to_account_id: @destination_account.id,
+        amount: 75,
+        date: "2024-02-01",
+        external_id: "ordi-transfer-#{SecureRandom.hex(4)}",
+        source: "ordi_app"
+      }
+    }
+
+    assert_difference "Transfer.count", 1 do
+      post api_v1_transfers_url, params: payload, headers: api_headers(read_write_api_key)
+      assert_response :created
+      post api_v1_transfers_url, params: payload, headers: api_headers(read_write_api_key)
+      assert_response :success
+    end
+
+    assert_equal JSON.parse(response.body)["external_id"], payload[:transfer][:external_id]
   end
 
   test "rejects create with read-only scope" do

@@ -93,6 +93,10 @@ RSpec.describe 'API V1 Transfers', type: :request do
       parameter name: :end_date, in: :query, required: false,
                 schema: { type: :string, format: :date },
                 description: 'Filter transfers until this date'
+      parameter name: :external_id, in: :query, type: :string, required: false,
+                description: 'Filter by durable external idempotency key'
+      parameter name: :source, in: :query, type: :string, required: false,
+                description: 'Filter by external idempotency source namespace'
 
       response '200', 'transfers listed' do
         schema '$ref' => '#/components/schemas/TransferDecisionCollection'
@@ -140,7 +144,9 @@ RSpec.describe 'API V1 Transfers', type: :request do
               to_account_id: { type: :string, format: :uuid },
               amount: { type: :number, description: 'Positive amount in the source account currency' },
               date: { type: :string, format: :date, description: 'Defaults to today' },
-              exchange_rate: { type: :number, nullable: true }
+              exchange_rate: { type: :number, nullable: true },
+              external_id: { type: :string, nullable: true, description: 'Optional idempotency key' },
+              source: { type: :string, nullable: true, description: 'Idempotency namespace' }
             },
             required: %w[from_account_id to_account_id amount]
           }

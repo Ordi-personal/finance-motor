@@ -66,6 +66,18 @@ class Api::V1::TransactionsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "should filter transactions by external_id and source" do
+    @transaction.entry.update!(external_id: "reconcile-txn-1", source: "ordi_app")
+
+    get api_v1_transactions_url,
+        params: { external_id: "reconcile-txn-1", source: "ordi_app" },
+        headers: api_headers(@api_key)
+
+    assert_response :success
+    response_data = JSON.parse(response.body)
+    assert_equal [ @transaction.id ], response_data["transactions"].map { |transaction| transaction["id"] }
+  end
+
   test "should include disabled account transactions in index history" do
     disabled_transaction = create_disabled_account_transaction(name: "Closed Account Grocery")
 

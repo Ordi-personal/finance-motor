@@ -23,6 +23,7 @@ module Api::V1::TransferDecisionFiltering
       query = apply_transfer_status_filter(query, status_model) if status_model
       query = apply_transfer_account_filter(query) if params[:account_id].present?
       query = apply_transfer_date_filter(query) if params[:start_date].present? || params[:end_date].present?
+      query = apply_transfer_external_id_filter(query) if params[:external_id].present? || params[:source].present?
       query
     end
 
@@ -78,6 +79,19 @@ module Api::V1::TransferDecisionFiltering
       query = query.where("entries.date >= ?", parse_date_param(:start_date)) if params[:start_date].present?
       query = query.where("entries.date <= ?", parse_date_param(:end_date)) if params[:end_date].present?
       query.select(:id)
+    end
+
+    def apply_transfer_external_id_filter(query)
+      transaction_query = accessible_transactions
+      entry_filters = {}
+      entry_filters[:external_id] = params[:external_id] if params[:external_id].present?
+      entry_filters[:source] = params[:source] if params[:source].present?
+      transaction_query = transaction_query.where(entries: entry_filters)
+      transaction_ids = transaction_query.select(:id)
+
+      query
+        .where(inflow_transaction_id: transaction_ids)
+        .or(query.where(outflow_transaction_id: transaction_ids))
     end
 
     def parse_date_param(key)

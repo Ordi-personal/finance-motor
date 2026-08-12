@@ -255,6 +255,16 @@ end
         query = query.where(merchant_id: merchant_ids)
       end
 
+      # Reconciliation lookup. Both fields belong to the entry, not the
+      # transaction record. Keep the existing family/account scope intact.
+      if params[:external_id].present?
+        query = query.joins(:entry).where(entries: { external_id: params[:external_id] })
+      end
+
+      if params[:source].present?
+        query = query.joins(:entry).where(entries: { source: params[:source] })
+      end
+
       # Date range filtering
       if params[:start_date].present?
         query = query.joins(:entry).where("entries.date >= ?", Date.parse(params[:start_date]))

@@ -850,6 +850,8 @@ RSpec.configure do |config|
               currency: { type: :string },
               transfer_type: { type: :string, enum: %w[transfer liability_payment loan_payment] },
               notes: { type: :string, nullable: true },
+              external_id: { type: :string, nullable: true },
+              source: { type: :string, nullable: true },
               inflow_transaction: { '$ref' => '#/components/schemas/TransferTransactionSide' },
               outflow_transaction: { '$ref' => '#/components/schemas/TransferTransactionSide' },
               created_at: { type: :string, format: :'date-time' },
