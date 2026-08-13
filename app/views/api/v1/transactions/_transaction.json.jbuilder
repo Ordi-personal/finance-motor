@@ -20,6 +20,9 @@ json.notes transaction.entry.notes
 json.external_id transaction.entry.external_id
 json.source transaction.entry.source
 json.classification transaction.entry.classification
+# Existing accounting classification, exposed additively so API consumers can
+# distinguish an unpaired credit-card payment from a genuine refund.
+json.kind transaction.kind
 
 # Account information
 json.account do

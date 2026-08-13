@@ -26,7 +26,7 @@ module Auth
       verify_aud: true
     }).first
 
-    if payload["jti"].blank? || replayed_token?(payload["jti"])
+    if payload["jti"].blank? || !mark_token_as_used(payload["jti"], payload["exp"])
       Rails.logger.warn("[SSO] Replayed or invalid token jti")
       return redirect_to new_session_path, alert: "Invalid SSO token"
     end
@@ -154,13 +154,11 @@ end
         path
       end
 
-      def replayed_token?(jti)
-        Rails.cache.exist?(sso_jti_cache_key(jti))
-      end
-
       def mark_token_as_used(jti, exp)
         expires_in = [ exp.to_i - Time.current.to_i, 1 ].max
-        Rails.cache.write(sso_jti_cache_key(jti), true, expires_in: expires_in)
+        Rails.cache.write(
+          sso_jti_cache_key(jti), true, expires_in: expires_in, unless_exist: true
+        )
       end
 
       def sso_jti_cache_key(jti)

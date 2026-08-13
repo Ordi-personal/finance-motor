@@ -30,6 +30,12 @@ RSpec.configure do |config|
             name: 'X-Api-Key',
             in: :header,
             description: 'API key for authentication. Generate one from your account settings.'
+          },
+          ordiSecretAuth: {
+            type: :apiKey,
+            name: 'X-Ordi-Secret',
+            in: :header,
+            description: 'Internal S2S provisioning secret. Never expose this header to browsers.'
           }
         },
         schemas: {
@@ -83,6 +89,16 @@ RSpec.configure do |config|
                 items: { '$ref' => '#/components/schemas/FamilyExport' }
               },
               meta: { '$ref' => '#/components/schemas/Pagination' }
+            }
+          },
+          ProvisioningResponse: {
+            type: :object,
+            required: %w[created user family account],
+            properties: {
+              created: { type: :boolean },
+              user: { type: :object },
+              family: { type: :object },
+              account: { type: :object, nullable: true }
             }
           },
           ErrorResponse: {

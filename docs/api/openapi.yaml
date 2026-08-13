@@ -16,6 +16,11 @@ components:
       name: X-Api-Key
       in: header
       description: API key for authentication. Generate one from your account settings.
+    ordiSecretAuth:
+      type: apiKey
+      name: X-Ordi-Secret
+      in: header
+      description: Internal S2S provisioning secret. Never expose this header to browsers.
   schemas:
     Pagination:
       type: object
@@ -107,6 +112,23 @@ components:
             "$ref": "#/components/schemas/FamilyExport"
         meta:
           "$ref": "#/components/schemas/Pagination"
+    ProvisioningResponse:
+      type: object
+      required:
+      - created
+      - user
+      - family
+      - account
+      properties:
+        created:
+          type: boolean
+        user:
+          type: object
+        family:
+          type: object
+        account:
+          type: object
+          nullable: true
     ErrorResponse:
       type: object
       required:
@@ -383,6 +405,10 @@ components:
         institution_domain:
           type: string
           nullable: true
+        available_credit:
+          type: number
+          nullable: true
+          description: Only present for CreditCard accounts
         created_at:
           type: string
           format: date-time
@@ -1564,6 +1590,12 @@ components:
           - liability_payment
           - loan_payment
         notes:
+          type: string
+          nullable: true
+        external_id:
+          type: string
+          nullable: true
+        source:
           type: string
           nullable: true
         inflow_transaction:
@@ -2919,6 +2951,77 @@ components:
               type: integer
               minimum: 0
 paths:
+  "/api/v1/provisioning":
+    post:
+      summary: Provision a fully-onboarded Ordi user
+      tags:
+      - Provisioning
+      security:
+      - ordiSecretAuth: []
+      parameters:
+      - name: X-Ordi-Secret
+        in: header
+        required: true
+        description: Internal S2S provisioning secret; never expose it to browsers.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                time_zone:
+                  type: string
+                currency:
+                  type: string
+                  enum:
+                  - BRL
+                  description: BRL only; other currencies are rejected with 422.
+                locale:
+                  type: string
+                initial_account:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    balance:
+                      type: number
+                    currency:
+                      type: string
+                      enum:
+                      - BRL
+                    subtype:
+                      type: string
+      responses:
+        '201':
+          description: User provisioned
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ProvisioningResponse"
+        '200':
+          description: User already existed
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ProvisioningResponse"
+        '422':
+          description: Invalid request or unsupported currency
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
   "/api/v1/accounts":
     get:
       summary: List accounts
@@ -2952,6 +3055,58 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/AccountCollection"
+    post:
+      summary: Create an account
+      tags:
+      - Accounts
+      security:
+      - apiKeyAuth: []
+      parameters: []
+      responses:
+        '201':
+          description: account created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/AccountDetail"
+        '422':
+          description: validation error - missing name
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                account:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      description: Account name (required)
+                    balance:
+                      type: number
+                      description: Starting balance
+                    currency:
+                      type: string
+                      description: Currency code (defaults to family currency)
+                    subtype:
+                      type: string
+                      description: Accountable subtype (defaults to 'checking' for
+                        Depository accounts)
+                    accountable_type:
+                      type: string
+                      description: One of Depository, Investment, Crypto, Property,
+                        Vehicle, OtherAsset, CreditCard, Loan, OtherLiability (defaults
+                        to Depository)
+                  required:
+                  - name
+              required:
+              - account
+        required: true
   "/api/v1/accounts/{id}":
     parameters:
     - name: id
@@ -7001,6 +7156,71 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ErrorResponse"
+    post:
+      summary: Create a transfer
+      tags:
+      - Transfers
+      security:
+      - apiKeyAuth: []
+      parameters: []
+      responses:
+        '201':
+          description: transfer created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TransferDecision"
+        '422':
+          description: validation failed
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+        '404':
+          description: account not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transfer:
+                  type: object
+                  properties:
+                    from_account_id:
+                      type: string
+                      format: uuid
+                    to_account_id:
+                      type: string
+                      format: uuid
+                    amount:
+                      type: number
+                      description: Positive amount in the source account currency
+                    date:
+                      type: string
+                      format: date
+                      description: Defaults to today
+                    exchange_rate:
+                      type: number
+                      nullable: true
+                    external_id:
+                      type: string
+                      nullable: true
+                      description: Optional idempotency key
+                    source:
+                      type: string
+                      nullable: true
+                      description: Idempotency namespace
+                  required:
+                  - from_account_id
+                  - to_account_id
+                  - amount
+              required:
+              - transfer
   "/api/v1/transfers/{id}":
     parameters:
     - name: id

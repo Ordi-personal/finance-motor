@@ -218,6 +218,15 @@ class Api::V1::TransactionsControllerTest < ActionDispatch::IntegrationTest
     assert response_data.key?("account")
   end
 
+  test "serializes the persisted transaction kind" do
+    @transaction.update!(kind: "cc_payment")
+
+    get api_v1_transaction_url(@transaction), headers: api_headers(@api_key)
+
+    assert_response :success
+    assert_equal "cc_payment", JSON.parse(response.body)["kind"]
+  end
+
   test "should show transaction with read-only API key" do
     get api_v1_transaction_url(@transaction), headers: api_headers(@read_only_api_key)
     assert_response :success

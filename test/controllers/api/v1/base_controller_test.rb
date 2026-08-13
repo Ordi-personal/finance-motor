@@ -136,10 +136,74 @@ class Api::V1::BaseControllerTest < ActionDispatch::IntegrationTest
         "X-User-Email" => @user.email
       }
 
-      assert_response :unauthorized
+      assert_response :forbidden
       response_body = JSON.parse(response.body)
-      assert_equal "unauthorized", response_body["error"]
+      assert_equal "forbidden", response_body["error"]
     end
+  end
+
+  test "rejects an unmapped method on an otherwise allowed S2S endpoint" do
+    with_env_overrides("ORDI_SHARED_SECRET" => "shared-secret") do
+      post "/api/v1/categories", params: { category: { name: "Nope" } }, headers: {
+        "X-Ordi-Secret" => "shared-secret",
+        "X-User-Email" => @user.email
+      }
+
+      assert_response :forbidden
+      assert_equal "forbidden", JSON.parse(response.body)["error"]
+    end
+  end
+
+  test "rejects a valid Ordi secret outside the S2S capability map" do
+    with_env_overrides("ORDI_SHARED_SECRET" => "shared-secret") do
+      get "/api/v1/balances", headers: {
+        "X-Ordi-Secret" => "shared-secret",
+        "X-User-Email" => @user.email
+      }
+
+      assert_response :forbidden
+      assert_equal "forbidden", JSON.parse(response.body)["error"]
+    end
+  end
+
+  test "provisioning secret cannot authenticate a financial operation" do
+    with_env_overrides("ORDI_SHARED_SECRET" => "operations-secret", "ORDI_PROVISIONING_SECRET" => "provisioning-secret") do
+      get "/api/v1/transactions", headers: {
+        "X-Ordi-Secret" => "provisioning-secret",
+        "X-User-Email" => @user.email
+      }
+
+      assert_response :unauthorized
+    end
+  end
+
+  test "locks the complete S2S endpoint and method capability matrix" do
+    expected = {
+      [ "GET", "/api/v1/preferences" ] => :read,
+      [ "PATCH", "/api/v1/preferences" ] => :write,
+      [ "GET", "/api/v1/accounts" ] => :read,
+      [ "POST", "/api/v1/accounts" ] => :write,
+      [ "GET", "/api/v1/accounts/account-1" ] => :read,
+      [ "GET", "/api/v1/transactions" ] => :read,
+      [ "POST", "/api/v1/transactions" ] => :write,
+      [ "GET", "/api/v1/transactions/transaction-1" ] => :read,
+      [ "PATCH", "/api/v1/transactions/transaction-1" ] => :write,
+      [ "PUT", "/api/v1/transactions/transaction-1" ] => :write,
+      [ "DELETE", "/api/v1/transactions/transaction-1" ] => :write,
+      [ "GET", "/api/v1/transfers" ] => :read,
+      [ "POST", "/api/v1/transfers" ] => :write,
+      [ "GET", "/api/v1/transfers/transfer-1" ] => :read,
+      [ "GET", "/api/v1/imports" ] => :read,
+      [ "POST", "/api/v1/imports" ] => :write,
+      [ "GET", "/api/v1/imports/import-1" ] => :read,
+      [ "GET", "/api/v1/categories" ] => :read
+    }
+
+    expected.each do |(method, path), capability|
+      assert_equal capability, s2s_capability_for(method, path), "#{method} #{path}"
+    end
+    assert_nil s2s_capability_for("POST", "/api/v1/categories")
+    assert_nil s2s_capability_for("GET", "/api/v1/balances")
   end
 
   test "should reject invalid API key" do
@@ -487,6 +551,12 @@ class Api::V1::BaseControllerTest < ActionDispatch::IntegrationTest
   end
 
 private
+
+  def s2s_capability_for(method, path)
+    controller = Api::V1::BaseController.new
+    controller.request = ActionDispatch::TestRequest.create("REQUEST_METHOD" => method, "PATH_INFO" => path)
+    controller.send(:ordi_s2s_capability)
+  end
 
   def capture_log(&block)
     io = StringIO.new

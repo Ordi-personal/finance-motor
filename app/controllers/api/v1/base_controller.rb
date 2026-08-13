@@ -170,7 +170,6 @@ class Api::V1::BaseController < ApplicationController
     def authenticate_ordi_secret
       shared_secret = ENV["ORDI_SHARED_SECRET"]
       return false if shared_secret.blank?
-      return false unless ordi_internal_request_allowed?
 
       secret = request.headers["X-Ordi-Secret"]
       email = request.headers["X-User-Email"]
@@ -180,26 +179,45 @@ class Api::V1::BaseController < ApplicationController
       @current_user = User.find_by(email: email)
       return false unless @current_user
 
+      capability = ordi_s2s_capability
+      unless capability
+        render_ordi_s2s_forbidden
+        return false
+      end
+
       @authentication_method = :ordi_secret
+      @ordi_s2s_capability = capability
       setup_current_context_for_api
       true
     end
 
-    ORDI_ALLOWED_PATHS = %w[
-      /api/v1/preferences
-      /api/v1/accounts
-      /api/v1/transactions
-      /api/v1/transfers
-      /api/v1/imports
-      /api/v1/categories
-      /api/v1/provisioning
-    ].freeze
+    # Explicitly grant each S2S endpoint/method only the capability used by
+    # fluxo-app. Do not replace these patterns with a path prefix: a new Sure
+    # action under an existing resource must be denied until reviewed here.
+    ORDI_S2S_ROUTE_CAPABILITIES = {
+      %r{\A/api/v1/preferences\z} => { "GET" => :read, "PATCH" => :write },
+      %r{\A/api/v1/accounts\z} => { "GET" => :read, "POST" => :write },
+      %r{\A/api/v1/accounts/[^/]+\z} => { "GET" => :read },
+      %r{\A/api/v1/transactions\z} => { "GET" => :read, "POST" => :write },
+      %r{\A/api/v1/transactions/[^/]+\z} => { "GET" => :read, "PATCH" => :write, "PUT" => :write, "DELETE" => :write },
+      %r{\A/api/v1/transfers\z} => { "GET" => :read, "POST" => :write },
+      %r{\A/api/v1/transfers/[^/]+\z} => { "GET" => :read },
+      %r{\A/api/v1/imports\z} => { "GET" => :read, "POST" => :write },
+      %r{\A/api/v1/imports/[^/]+\z} => { "GET" => :read },
+      %r{\A/api/v1/categories\z} => { "GET" => :read }
+    }.freeze
 
-    def ordi_internal_request_allowed?
-      return true if ORDI_ALLOWED_PATHS.any? { |prefix| request.path.start_with?(prefix) }
+    def ordi_s2s_capability
+      capabilities = ORDI_S2S_ROUTE_CAPABILITIES.find { |pattern, _| pattern.match?(request.path) }&.last
+      capabilities&.fetch(request.request_method, nil)
+    end
 
-      Rails.logger.warn("Ordi internal auth rejected for path #{request.path}")
-      false
+    def render_ordi_s2s_forbidden
+      Rails.logger.warn("Ordi internal auth rejected for #{request.method} #{request.path}")
+      render_json(
+        { error: "forbidden", message: "Ordi internal credentials are not authorized for this endpoint and method" },
+        status: :forbidden
+      )
     end
 
     # Render unauthorized response
@@ -220,7 +238,7 @@ class Api::V1::BaseController < ApplicationController
       when :api_key
         @api_key&.scopes || []
       when :ordi_secret
-        [ "read", "write", "read_write" ]
+        @ordi_s2s_capability == :write ? [ "read", "read_write" ] : [ "read" ]
       else
         []
       end

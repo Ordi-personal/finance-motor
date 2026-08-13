@@ -313,6 +313,76 @@ O endpoint `POST /api/v1/transfers` aceita `external_id` e `source` opcionais. Q
 
 Os endpoints de leitura existentes (`GET /api/v1/transactions` e `GET /api/v1/transfers`) aceitam `external_id` e `source` como filtros opcionais. Os filtros permanecem dentro do escopo de família e contas acessíveis e permitem que o Ordi reconcilie operações cujo commit teve resposta desconhecida, sem acesso direto ao banco do Sure. Não há nova rota, alteração de autenticação ou exposição de segredo; a mudança é aditiva e upstream-friendly.
 
+### 23. SSO replay guard atômico
+
+**Arquivo:** `app/controllers/auth/sso_controller.rb`
+
+**Tipo:** Security / upstream-friendly bug fix
+
+O callback SSO grava o `jti` com `Rails.cache.write(..., unless_exist: true)` e trata o retorno falso como replay. Isso elimina a corrida check-then-write entre duas requisições concorrentes que compartilham o mesmo JWT. O patch não altera o formato do token, o TTL, issuer, audience ou segredo.
+
+### 24. Campo `kind` na serialização de transações
+
+**Arquivo:** `app/views/api/v1/transactions/_transaction.json.jbuilder`
+
+**Tipo:** API Enhancement
+**Risco:** Low
+
+Expõe aditivamente o `kind` já persistido em cada transação no JSON de
+`GET /api/v1/transactions` e `GET /api/v1/transactions/:id`. Consumidores
+podem distinguir `cc_payment` e `funds_movement` de um estorno verdadeiro
+mesmo quando o Sure não conseguiu parear as duas pernas em um `Transfer`.
+Não há mudança de rota, autenticação, regras contábeis ou campos existentes.
+
+### 25. Provisioning explícito BRL-only
+
+**Arquivos:** `app/services/saas/user_provisioning_service.rb`,
+`app/controllers/api/v1/provisioning_controller.rb` e
+`test/controllers/api/v1/provisioning_controller_test.rb`.
+
+**Tipo:** Contrato de integração / upstream-candidate
+**Risco:** Low
+
+O endpoint `POST /api/v1/provisioning` rejeita com `422` e erro explícito
+`unsupported_currency` qualquer moeda diferente de BRL, tanto na família
+quanto na conta inicial. Isso evita aceitar uma moeda e sobrescrevê-la
+silenciosamente durante o bootstrap. O contrato do Ordi é BRL-only por
+decisão de produto; não há implementação de conversão ou multi-moeda.
+
+### 26. Allowlist S2S por endpoint e método
+
+**Arquivos:** `app/controllers/api/v1/base_controller.rb`,
+`app/controllers/api/v1/provisioning_controller.rb`
+
+**Tipo:** Security / Integration
+**Risco:** Medium
+
+Substitui a allowlist S2S por prefixo por uma matriz explícita de
+endpoint+método para as operações que o fluxo-app realmente consome. Cada
+entrada declara `read` ou `write`; métodos não mapeados e endpoints fora do
+mapa recebem `403`, mesmo com segredo válido. O endpoint de provisioning usa
+`ORDI_PROVISIONING_SECRET` quando configurado e aceita `ORDI_SHARED_SECRET`
+somente como fallback transitório. O segredo de provisioning não autentica as
+operações financeiras normais.
+
+
+### 27. Provisioning idempotente sob corrida de email
+
+**Arquivo:** `app/controllers/api/v1/provisioning_controller.rb` e
+`test/controllers/api/v1/provisioning_controller_test.rb`.
+
+**Tipo:** Bug Fix / Integration
+**Risco:** Low-Medium
+
+Quando duas requisições de provisioning para o mesmo email competem, um
+`ActiveRecord::RecordInvalid` de unicidade de email ou um
+`ActiveRecord::RecordNotUnique` não é tratado como falha permanente. O
+controller reconsulta o usuário já persistido e responde o replay idempotente
+com `created: false`/HTTP 200. Validações não relacionadas continuam em 422 e
+erros sem usuário existente continuam 500; não há relaxamento de autorização
+ou alteração do contrato de segredo S2S. O teste usa threads reais e prova uma
+única família/usuário.
+
 This fork maintains the original **AGPL-3.0** license. See [LICENSE](LICENSE) file.
 
 ---

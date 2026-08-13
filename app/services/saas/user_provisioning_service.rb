@@ -9,6 +9,7 @@ module Saas
   # SSO callback. Extracted as its own service (rather than modifying the
   # SSO controller) so both callers can share the logic additively.
   class UserProvisioningService
+    SUPPORTED_CURRENCY = "BRL"
     Result = Struct.new(:user, :family, :account, :created, keyword_init: true)
 
     def self.provision!(**kwargs)
@@ -23,6 +24,9 @@ module Saas
       @currency = currency.presence || "BRL"
       @locale = locale.presence || "pt-BR"
       @initial_account = initial_account.presence
+      validate_currency!
+      initial_account_currency = @initial_account&.[](:currency) || @initial_account&.[]("currency")
+      validate_currency!(initial_account_currency) if initial_account_currency.present?
     end
 
     def provision!
@@ -71,6 +75,7 @@ module Saas
         name = @initial_account[:name].presence || "Dinheiro"
         balance = @initial_account[:balance].presence || 0
         currency = @initial_account[:currency].presence || family.currency
+        validate_currency!(currency)
         subtype = @initial_account[:subtype].presence || "checking"
 
         family.accounts.create_and_sync({
@@ -81,6 +86,12 @@ module Saas
           accountable_type: "Depository",
           accountable_attributes: { subtype: subtype }
         })
+      end
+
+      def validate_currency!(currency = @currency)
+        return if currency.to_s.upcase == SUPPORTED_CURRENCY
+
+        raise ArgumentError, "Provisioning supports BRL only; received #{currency}"
       end
   end
 end
